@@ -1,0 +1,27 @@
+# Web framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+
+# Database
+sqlmodel>=0.0.22
+sqlalchemy[asyncio]>=2.0.36
+asyncpg>=0.30.0
+psycopg[binary]>=3.2.0
+
+# Migrations
+alembic>=1.14.0
+
+# Auth
+PyJWT>=2.10.0
+bcrypt>=4.2.0
+
+# Email
+resend>=2.0.0
+
+# Settings
+pydantic-settings>=2.7.0
+python-dotenv>=1.0.1
+
+# Utilities
+python-dateutil>=2.9.0
+httpx>=0.28.0
