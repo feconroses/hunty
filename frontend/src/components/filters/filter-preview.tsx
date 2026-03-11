@@ -96,18 +96,18 @@ export function FilterPreview({
 
       <div className="relative rounded-lg bg-muted/50 p-4">
         {loading ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-base text-muted-foreground">
             <RefreshCw className="size-3.5 animate-spin" />
             Loading prompt preview...
           </div>
         ) : error ? (
-          <p className="text-sm text-destructive">{error}</p>
+          <p className="text-base text-destructive">{error}</p>
         ) : promptText ? (
-          <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-foreground/90">
+          <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-foreground/90">
             {promptText}
           </pre>
         ) : (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             No prompt generated. Add some filter rules first.
           </p>
         )}

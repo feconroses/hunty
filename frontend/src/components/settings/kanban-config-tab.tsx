@@ -184,7 +184,7 @@ function SortableStageItem({ stage, onUpdate, onDelete }: SortableStageProps) {
                   setIsEditing(false);
                 }
               }}
-              className="h-7 text-sm"
+              className="h-7 text-base"
               autoFocus
               disabled={isSaving}
             />
@@ -207,7 +207,7 @@ function SortableStageItem({ stage, onUpdate, onDelete }: SortableStageProps) {
               setEditName(stage.name);
               setIsEditing(true);
             }}
-            className="group flex items-center gap-1.5 text-sm text-foreground hover:text-foreground/80"
+            className="group flex items-center gap-1.5 text-base text-foreground hover:text-foreground/80"
           >
             <span className="truncate">{stage.name}</span>
             <Pencil className="size-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
@@ -217,7 +217,7 @@ function SortableStageItem({ stage, onUpdate, onDelete }: SortableStageProps) {
 
       {/* Default badge */}
       {stage.is_default && (
-        <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+        <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
           Default
         </span>
       )}
@@ -332,7 +332,7 @@ export function KanbanConfigTab() {
           <CardTitle>Pipeline Stages</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-destructive">{error}</p>
+          <p className="text-base text-destructive">{error}</p>
         </CardContent>
       </Card>
     );

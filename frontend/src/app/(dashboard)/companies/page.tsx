@@ -99,8 +99,8 @@ export default function CompaniesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Companies"
-        subtitle="Manage the companies you're tracking"
+        title="Target Companies"
+        subtitle="Define the companies whose job boards you want to monitor"
         actions={
           <Button
             onClick={() => setDialogOpen(true)}

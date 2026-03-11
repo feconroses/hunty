@@ -1,70 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Github,
   Building2,
-  Filter,
   Columns3,
   Chrome,
-  Terminal,
   ArrowRight,
 } from "lucide-react";
-
-// ─── Typing Animation Hook ─────────────────────────────────────────────────
-
-function useTypingAnimation(text: string, speed = 80, startDelay = 600) {
-  const [displayedText, setDisplayedText] = useState("");
-  const [isComplete, setIsComplete] = useState(false);
-
-  useEffect(() => {
-    let index = 0;
-    let timeout: ReturnType<typeof setTimeout>;
-
-    const startTyping = () => {
-      timeout = setTimeout(function type() {
-        if (index < text.length) {
-          setDisplayedText(text.slice(0, index + 1));
-          index++;
-          timeout = setTimeout(type, speed);
-        } else {
-          setIsComplete(true);
-        }
-      }, speed);
-    };
-
-    const delayTimeout = setTimeout(startTyping, startDelay);
-
-    return () => {
-      clearTimeout(delayTimeout);
-      clearTimeout(timeout);
-    };
-  }, [text, speed, startDelay]);
-
-  return { displayedText, isComplete };
-}
-
-// ─── Terminal Window Component ──────────────────────────────────────────────
-
-function TerminalWindow({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="w-full max-w-2xl overflow-hidden rounded-xl border border-[#1db954]/20 bg-[#0a0a0a] shadow-[0_0_60px_-15px_rgba(29,185,84,0.15)]">
-      {/* Title bar */}
-      <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3">
-        <div className="size-3 rounded-full bg-[#ff5f57]" />
-        <div className="size-3 rounded-full bg-[#febc2e]" />
-        <div className="size-3 rounded-full bg-[#28c840]" />
-        <span className="ml-2 font-mono text-xs text-white/30">
-          hunty -- bash
-        </span>
-      </div>
-      {/* Terminal body */}
-      <div className="p-5 sm:p-6">{children}</div>
-    </div>
-  );
-}
 
 // ─── Feature Card ───────────────────────────────────────────────────────────
 
@@ -76,14 +19,44 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <div className="group rounded-xl border border-dashed border-[#1db954]/30 bg-[#0a0a0a] p-5 transition-all hover:border-[#1db954]/60 hover:shadow-[0_0_30px_-10px_rgba(29,185,84,0.1)]">
-      <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-[#1db954]/10 text-[#1db954]">
+    <div className="group rounded-xl border border-white/[0.06] bg-[#181818] p-6 transition-all duration-300 hover:border-white/[0.12] hover:bg-[#1c1c1c]">
+      <div className="mb-4 flex size-10 items-center justify-center rounded-lg bg-[#1db954]/10 text-[#1db954] transition-colors group-hover:bg-[#1db954]/15">
         {icon}
       </div>
-      <h3 className="mb-1.5 font-mono text-sm font-semibold text-white">
+      <h3 className="mb-2 text-xl font-bold text-white">
         {title}
       </h3>
-      <p className="text-sm leading-relaxed text-white/50">{description}</p>
+      <p className="text-base leading-relaxed text-white/60">{description}</p>
+    </div>
+  );
+}
+
+// ─── Step Card ───────────────────────────────────────────────────────────────
+
+interface StepCardProps {
+  number: string;
+  title: string;
+  description: string;
+  code?: string;
+}
+
+function StepCard({ number, title, description, code }: StepCardProps) {
+  return (
+    <div className="relative">
+      <span className="text-6xl font-extrabold text-[#1db954]/15">
+        {number}
+      </span>
+      <h3 className="mt-3 text-xl font-bold text-white">
+        {title}
+      </h3>
+      <p className="mt-2 text-base leading-relaxed text-white/60">
+        {description}
+      </p>
+      {code && (
+        <div className="mt-3 rounded-md border border-white/[0.06] bg-[#0a0a0a] px-3 py-2">
+          <code className="font-mono text-sm text-white/60">{code}</code>
+        </div>
+      )}
     </div>
   );
 }
@@ -91,200 +64,295 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
 // ─── Landing Page ───────────────────────────────────────────────────────────
 
 export default function HomePage() {
-  const { displayedText, isComplete } = useTypingAnimation("hunty start", 90, 800);
-
   return (
     <div className="min-h-screen bg-[#121212] text-white">
-      {/* Background glow effects */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[900px] rounded-full bg-[#1db954]/[0.04] blur-[100px]" />
-        <div className="absolute right-0 top-1/3 h-[400px] w-[400px] rounded-full bg-[#1db954]/[0.02] blur-[80px]" />
-      </div>
+      {/* Dot grid background */}
+      <div
+        className="pointer-events-none fixed inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+        }}
+      />
 
-      {/* ── Nav Bar ──────────────────────────────────────────────────────── */}
-      <nav className="relative z-10 flex items-center justify-between px-6 py-5 sm:px-10">
-        <Link href="/" className="flex items-center gap-0.5">
-          <span className="text-xl font-bold tracking-tight text-white">
-            Hunty
-          </span>
-          <span className="text-xl font-bold text-[#1db954]">.</span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link href="/login">
-            <Button
-              variant="ghost"
-              className="text-white/70 hover:text-white hover:bg-white/5"
-            >
-              Sign In
-            </Button>
+      {/* ── Sticky Navbar ──────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#121212]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+          <Link href="/" className="flex items-center gap-0.5">
+            <span className="text-2xl font-extrabold tracking-tight text-white">
+              Hunty
+            </span>
+            <span className="text-2xl font-bold text-[#1db954]">.</span>
           </Link>
-          <Link href="/register">
-            <Button className="bg-[#1db954] font-semibold text-black hover:bg-[#1ed760]">
-              Get Started
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/login">
+              <Button
+                variant="ghost"
+                className="text-white/70 hover:bg-white/5 hover:text-white"
+              >
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button className="bg-[#1db954] font-semibold text-black hover:bg-[#1ed760]">
+                Get Started
+              </Button>
+            </Link>
+          </div>
         </div>
       </nav>
 
-      {/* ── Hero Section ─────────────────────────────────────────────────── */}
-      <section className="relative z-10 flex flex-col items-center px-6 pt-16 pb-20 text-center sm:pt-24 sm:pb-28">
-        <TerminalWindow>
-          <div className="font-mono text-sm sm:text-base">
-            <div className="flex items-center gap-2">
-              <span className="text-[#1db954]">$</span>
-              <span className="text-white/90">{displayedText}</span>
-              <span
-                className={`inline-block h-4 w-2 bg-[#1db954] ${
-                  isComplete ? "animate-pulse" : "animate-blink"
-                }`}
-              />
-            </div>
-            {isComplete && (
-              <div className="mt-3 space-y-1 text-white/40">
-                <p>
-                  <span className="text-[#1db954]">{'>'}</span> Initializing job search pipeline...
-                </p>
-                <p>
-                  <span className="text-[#1db954]">{'>'}</span> Loading target companies...
-                </p>
-                <p>
-                  <span className="text-[#1db954]">{'>'}</span> Ready. Happy hunting.
-                </p>
-              </div>
-            )}
-          </div>
-        </TerminalWindow>
+      {/* ── Hero Section ─────────────────────────────────────────────── */}
+      <section className="relative z-10 flex flex-col items-center px-6 pt-20 pb-16 text-center sm:pt-28 sm:pb-20">
+        {/* Radial glow */}
+        <div className="pointer-events-none absolute -top-[200px] left-1/2 h-[600px] w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,rgba(29,185,84,0.08)_0%,transparent_70%)] blur-[60px]" />
 
-        <h1 className="mt-10 max-w-xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-          Open-source job search,{" "}
-          <span className="text-[#1db954]">powered by AI</span>
+        {/* Pill badge */}
+        <span
+          className="animate-fade-in-up inline-flex items-center gap-1.5 rounded-full border border-[#1db954]/20 bg-[#1db954]/10 px-3 py-1 text-sm font-medium text-[#1db954]"
+        >
+          Open Source & Self-Hosted
+        </span>
+
+        {/* Headline */}
+        <h1
+          className="animate-fade-in-up mt-6 max-w-3xl text-5xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-6xl lg:text-8xl"
+          style={{ animationDelay: "100ms" }}
+        >
+          Your job search,{" "}
+          <span className="bg-gradient-to-r from-[#1db954] to-[#1ed760] bg-clip-text text-transparent">
+            automated
+          </span>
         </h1>
-        <p className="mt-4 max-w-lg text-base text-white/50 sm:text-lg">
-          Define your target companies. Set your criteria. Let Claude find and
-          evaluate jobs for you.
+
+        {/* Subheadline */}
+        <p
+          className="animate-fade-in-up mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/60 sm:text-xl"
+          style={{ animationDelay: "200ms" }}
+        >
+          Define target companies, set your criteria, and let Claude discover
+          and evaluate jobs for you. Open source, self-hosted, yours.
         </p>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        {/* CTAs */}
+        <div
+          className="animate-fade-in-up mt-8 flex flex-col gap-3 sm:flex-row"
+          style={{ animationDelay: "300ms" }}
+        >
           <Link href="/register">
             <Button
               size="lg"
-              className="w-full bg-[#1db954] px-8 font-semibold text-black hover:bg-[#1ed760] sm:w-auto"
+              className="h-11 w-full bg-[#1db954] px-6 font-semibold text-black hover:bg-[#1ed760] sm:w-auto"
             >
               Get Started
               <ArrowRight className="size-4" />
             </Button>
           </Link>
           <a
-            href="https://github.com/hunty"
+            href="https://github.com/federicopasqualito/hunty"
             target="_blank"
             rel="noopener noreferrer"
           >
             <Button
               size="lg"
               variant="outline"
-              className="w-full border-white/10 bg-transparent px-8 text-white/70 hover:border-white/20 hover:bg-white/5 hover:text-white sm:w-auto"
+              className="h-11 w-full border-white/10 bg-white/[0.03] px-6 text-white/70 hover:border-white/15 hover:bg-white/[0.06] hover:text-white sm:w-auto"
             >
               <Github className="size-4" />
               View on GitHub
             </Button>
           </a>
         </div>
+
+        {/* Hero Screenshot */}
+        <div
+          className="animate-fade-in-up relative mx-auto mt-16 max-w-5xl w-full"
+          style={{ animationDelay: "500ms" }}
+        >
+          {/* Glow behind screenshot */}
+          <div className="pointer-events-none absolute -inset-x-20 -top-20 h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(29,185,84,0.12)_0%,transparent_70%)]" />
+
+          {/* Browser chrome mockup */}
+          <div className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a] shadow-2xl shadow-black/50 [perspective:2000px]">
+            {/* Title bar */}
+            <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
+              <div className="size-2.5 rounded-full bg-[#ff5f57]" />
+              <div className="size-2.5 rounded-full bg-[#febc2e]" />
+              <div className="size-2.5 rounded-full bg-[#28c840]" />
+              <div className="ml-3 flex-1 rounded-md bg-white/[0.04] px-3 py-1">
+                <span className="text-sm text-white/40">
+                  localhost:3000/jobs
+                </span>
+              </div>
+            </div>
+            {/* Screenshot */}
+            <div className="transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] [transform:rotateX(2deg)] group-hover:[transform:rotateX(0deg)]">
+              <Image
+                src="/images/hero-dashboard.png"
+                alt="Hunty kanban dashboard"
+                width={1920}
+                height={1080}
+                className="w-full"
+                priority
+              />
+            </div>
+          </div>
+        </div>
       </section>
 
-      {/* ── Features Section ─────────────────────────────────────────────── */}
+      {/* ── Badge Strip ──────────────────────────────────────────────── */}
+      <section className="relative z-10 py-16">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-8 gap-y-4">
+          {[
+            "Built with Next.js & FastAPI",
+            "100% Self-Hosted",
+            "No Vendor Lock-in",
+            "Claude AI Powered",
+          ].map((label) => (
+            <span
+              key={label}
+              className="flex items-center gap-2 text-sm text-white/50"
+            >
+              <span className="size-1 rounded-full bg-[#1db954]/40" />
+              {label}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Features Section ─────────────────────────────────────────── */}
       <section className="relative z-10 px-6 pb-20 sm:px-10 sm:pb-28">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-10 text-center">
-            <p className="font-mono text-xs uppercase tracking-widest text-[#1db954]/70">
-              Features
-            </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          <div className="mb-12 text-center">
+            <p className="text-base font-medium text-[#1db954]">Features</p>
+            <h2 className="mt-2 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
               Everything you need to land your next role
             </h2>
+            <p className="mx-auto mt-3 max-w-xl text-lg text-white/60">
+              From company tracking to automated job discovery, Hunty handles
+              your entire job search pipeline.
+            </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
               icon={<Building2 className="size-5" />}
-              title="Define Companies"
-              description="Add your target companies and automatically discover their careers pages."
-            />
-            <FeatureCard
-              icon={<Filter className="size-5" />}
-              title="Smart Filtering"
-              description="Set rules and let AI evaluate job relevance based on your criteria."
+              title="Target Companies"
+              description="Add your target companies and automatically discover their careers pages. Manage everything in a clean table view."
             />
             <FeatureCard
               icon={<Columns3 className="size-5" />}
-              title="Kanban Pipeline"
-              description="Track applications from discovery through interview to offer."
+              title="AI-Powered Pipeline"
+              description="Jobs are discovered, evaluated against your filters, and flow through a kanban pipeline from discovery to offer."
             />
             <FeatureCard
               icon={<Chrome className="size-5" />}
               title="Claude Automation"
-              description="Browser tasks powered by Claude in Chrome to scan and evaluate jobs."
+              description="Browser tasks powered by Claude scan career pages, evaluate relevance, and create jobs automatically."
             />
           </div>
         </div>
       </section>
 
-      {/* ── Docker / Getting Started Section ─────────────────────────────── */}
+      {/* ── How It Works ─────────────────────────────────────────────── */}
       <section className="relative z-10 px-6 pb-20 sm:px-10 sm:pb-28">
-        <div className="mx-auto max-w-2xl">
-          <div className="mb-8 text-center">
-            <p className="font-mono text-xs uppercase tracking-widest text-[#1db954]/70">
-              Quick Start
-            </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              Up and running in seconds
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-12 text-center">
+            <p className="text-base font-medium text-[#1db954]">How it works</p>
+            <h2 className="mt-2 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+              From setup to your first automated job scan
             </h2>
           </div>
 
-          <TerminalWindow>
-            <div className="space-y-2 font-mono text-sm">
-              <div>
-                <span className="text-[#1db954]">$</span>{" "}
-                <span className="text-white/80">
-                  git clone https://github.com/yourusername/hunty.git
-                </span>
-              </div>
-              <div>
-                <span className="text-[#1db954]">$</span>{" "}
-                <span className="text-white/80">cd hunty</span>
-              </div>
-              <div>
-                <span className="text-[#1db954]">$</span>{" "}
-                <span className="text-white/80">docker compose up</span>
-              </div>
-              <div className="pt-1">
-                <span className="text-[#1db954]/60">
-                  # Open http://localhost:3000
-                </span>
-              </div>
-            </div>
-          </TerminalWindow>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <StepCard
+              number="01"
+              title="Self-host in seconds"
+              description="Clone the repo, run one command, and you're live. Your data stays on your infrastructure."
+              code="docker compose up"
+            />
+            <StepCard
+              number="02"
+              title="Define your targets"
+              description="Add companies you want to work for. Set your filters for role, location, seniority, and more."
+            />
+            <StepCard
+              number="03"
+              title="Let Claude work"
+              description="Queue browser tasks for Claude to scan careers pages, discover jobs, and evaluate them against your criteria."
+            />
+          </div>
         </div>
       </section>
 
-      {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="relative z-10 border-t border-white/5 px-6 py-10 text-center">
-        <p className="text-sm text-white/40">
-          Built for job seekers. Open source &amp; free.
-        </p>
-        <a
-          href="https://github.com/hunty"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-2 text-sm text-white/30 transition-colors hover:text-[#1db954]"
-        >
-          <Github className="size-4" />
-          Star on GitHub
-        </a>
-        <div className="mt-6 font-mono text-xs text-white/20">
-          <span className="text-[#1db954]/40">$</span> exit 0
+      {/* ── Open Source CTA ───────────────────────────────────────────── */}
+      <section className="relative z-10 px-6 py-20 sm:px-10">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-[#1db954]/[0.03] to-transparent" />
+        <div className="relative mx-auto max-w-3xl text-center">
+          <h2 className="text-4xl font-extrabold text-white sm:text-5xl">
+            Open source. Self-hosted.{" "}
+            <span className="text-[#1db954]">Yours.</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-lg text-lg text-white/60">
+            Hunty is free and open source. Star us on GitHub, contribute, or
+            just use it.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link href="/register">
+              <Button
+                size="lg"
+                className="h-11 w-full bg-[#1db954] px-6 font-semibold text-black hover:bg-[#1ed760] sm:w-auto"
+              >
+                Get Started
+                <ArrowRight className="size-4" />
+              </Button>
+            </Link>
+            <a
+              href="https://github.com/federicopasqualito/hunty"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-11 w-full border-white/10 bg-white/[0.03] px-6 text-white/70 hover:border-white/15 hover:bg-white/[0.06] hover:text-white sm:w-auto"
+              >
+                <Github className="size-4" />
+                Star on GitHub
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer ───────────────────────────────────────────────────── */}
+      <footer className="relative z-10 border-t border-white/[0.06] px-6 py-8">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-0.5">
+              <span className="text-base font-bold text-white/60">
+                Hunty
+              </span>
+              <span className="text-base font-bold text-[#1db954]/60">.</span>
+            </Link>
+            <span className="text-sm text-white/50">
+              &copy; {new Date().getFullYear()}
+            </span>
+          </div>
+          <div className="flex items-center gap-6">
+            <a
+              href="https://github.com/federicopasqualito/hunty"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-base text-white/50 transition-colors hover:text-white/60"
+            >
+              <Github className="size-3.5" />
+              GitHub
+            </a>
+          </div>
         </div>
       </footer>
-
     </div>
   );
 }

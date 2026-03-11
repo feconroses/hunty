@@ -44,7 +44,7 @@ export default function SettingsPage() {
           ))}
         </TabsList>
 
-        <div className="mt-6">
+        <div className="mt-6 max-w-2xl">
           <TabsContent value="profile">
             <ProfileTab />
           </TabsContent>

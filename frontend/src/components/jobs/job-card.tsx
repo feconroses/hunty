@@ -2,8 +2,8 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MapPin, GripVertical } from "lucide-react";
-import type { EnrichedJob, Job } from "@/types";
+import { MapPin } from "lucide-react";
+import type { EnrichedJob } from "@/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -77,71 +77,63 @@ export function JobCard({ job, onClick, isDragging: isDraggingProp }: JobCardPro
       {...attributes}
       {...listeners}
       className={cn(
-        "group bg-card border border-border rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-primary/30 transition-all",
-        isDragging && "opacity-50 scale-[1.02] shadow-lg z-50"
+        "group bg-card border border-border/40 rounded-lg p-3 cursor-grab active:cursor-grabbing transition-all duration-150 ease-out hover:border-border hover:bg-muted/30",
+        isDragging && "opacity-40 ring-1 ring-primary/30 shadow-lg shadow-primary/5 z-50"
       )}
       onClick={(e) => {
-        // Only trigger if not dragging and not clicking drag handle
         if (!isDragging && onClick) {
           onClick(job);
         }
       }}
     >
-      <div className="flex items-start gap-2">
-        {/* Drag handle (visual only) */}
-        <div className="mt-0.5 shrink-0 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-          <GripVertical className="size-4" />
-        </div>
+      <div className="space-y-1.5">
+        {/* Title */}
+        <p className="font-semibold text-base text-foreground/90 leading-tight truncate">
+          {job.title}
+        </p>
 
-        <div className="flex-1 min-w-0 space-y-1.5">
-          {/* Title */}
-          <p className="font-semibold text-sm text-foreground leading-tight truncate">
-            {job.title}
+        {/* Company */}
+        {job.company_id && (
+          <p className="text-base font-medium text-muted-foreground truncate">
+            {job.company_name || job.company_id}
           </p>
+        )}
 
-          {/* Company - we show company_id for now, the page passes enriched data */}
-          {job.company_id && (
-            <p className="text-xs text-muted-foreground truncate">
-              {job.company_name || job.company_id}
-            </p>
-          )}
-
-          {/* Location */}
-          {job.location && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="size-3 shrink-0" />
-              <span className="truncate">{job.location}</span>
-            </div>
-          )}
-
-          {/* Badges row */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            {job.work_type && (
-              <Badge
-                variant="outline"
-                className={cn(
-                  "text-[10px] px-1.5 h-4",
-                  WORK_TYPE_STYLES[job.work_type]
-                )}
-              >
-                {WORK_TYPE_LABELS[job.work_type]}
-              </Badge>
-            )}
-            {job.seniority_level && (
-              <Badge
-                variant="secondary"
-                className="text-[10px] px-1.5 h-4 bg-muted text-muted-foreground"
-              >
-                {SENIORITY_LABELS[job.seniority_level]}
-              </Badge>
-            )}
+        {/* Location */}
+        {job.location && (
+          <div className="flex items-center gap-1 text-base text-muted-foreground">
+            <MapPin className="size-4 shrink-0" />
+            <span className="truncate">{job.location}</span>
           </div>
+        )}
 
-          {/* Salary */}
-          {salary && (
-            <p className="text-xs text-muted-foreground">{salary}</p>
+        {/* Badges row */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {job.work_type && (
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-sm px-2 h-5",
+                WORK_TYPE_STYLES[job.work_type]
+              )}
+            >
+              {WORK_TYPE_LABELS[job.work_type]}
+            </Badge>
+          )}
+          {job.seniority_level && (
+            <Badge
+              variant="secondary"
+              className="text-sm px-2 h-5 bg-muted text-muted-foreground"
+            >
+              {SENIORITY_LABELS[job.seniority_level]}
+            </Badge>
           )}
         </div>
+
+        {/* Salary */}
+        {salary && (
+          <p className="text-base text-muted-foreground">{salary}</p>
+        )}
       </div>
     </div>
   );
@@ -152,51 +144,46 @@ export function JobCardOverlay({ job }: { job: EnrichedJob }) {
   const salary = formatSalary(job.salary_min, job.salary_max, job.salary_currency);
 
   return (
-    <div className="bg-card border border-primary/40 rounded-lg p-3 shadow-xl scale-[1.02] w-[300px] cursor-grabbing">
-      <div className="flex items-start gap-2">
-        <div className="mt-0.5 shrink-0 text-muted-foreground/50">
-          <GripVertical className="size-4" />
-        </div>
-        <div className="flex-1 min-w-0 space-y-1.5">
-          <p className="font-semibold text-sm text-foreground leading-tight truncate">
-            {job.title}
+    <div className="bg-card border border-primary/30 ring-1 ring-primary/20 rounded-lg p-3 shadow-xl shadow-primary/10 w-[280px] cursor-grabbing">
+      <div className="space-y-1.5">
+        <p className="font-semibold text-base text-foreground/90 leading-tight truncate">
+          {job.title}
+        </p>
+        {job.company_id && (
+          <p className="text-base font-medium text-muted-foreground truncate">
+            {job.company_name || job.company_id}
           </p>
-          {job.company_id && (
-            <p className="text-xs text-muted-foreground truncate">
-              {job.company_name || job.company_id}
-            </p>
-          )}
-          {job.location && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="size-3 shrink-0" />
-              <span className="truncate">{job.location}</span>
-            </div>
-          )}
-          <div className="flex flex-wrap items-center gap-1.5">
-            {job.work_type && (
-              <Badge
-                variant="outline"
-                className={cn(
-                  "text-[10px] px-1.5 h-4",
-                  WORK_TYPE_STYLES[job.work_type]
-                )}
-              >
-                {WORK_TYPE_LABELS[job.work_type]}
-              </Badge>
-            )}
-            {job.seniority_level && (
-              <Badge
-                variant="secondary"
-                className="text-[10px] px-1.5 h-4 bg-muted text-muted-foreground"
-              >
-                {SENIORITY_LABELS[job.seniority_level]}
-              </Badge>
-            )}
+        )}
+        {job.location && (
+          <div className="flex items-center gap-1 text-base text-muted-foreground">
+            <MapPin className="size-4 shrink-0" />
+            <span className="truncate">{job.location}</span>
           </div>
-          {salary && (
-            <p className="text-xs text-muted-foreground">{salary}</p>
+        )}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {job.work_type && (
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-sm px-2 h-5",
+                WORK_TYPE_STYLES[job.work_type]
+              )}
+            >
+              {WORK_TYPE_LABELS[job.work_type]}
+            </Badge>
+          )}
+          {job.seniority_level && (
+            <Badge
+              variant="secondary"
+              className="text-sm px-2 h-5 bg-muted text-muted-foreground"
+            >
+              {SENIORITY_LABELS[job.seniority_level]}
+            </Badge>
           )}
         </div>
+        {salary && (
+          <p className="text-base text-muted-foreground">{salary}</p>
+        )}
       </div>
     </div>
   );

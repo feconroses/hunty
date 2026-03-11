@@ -94,7 +94,7 @@ export function TaskCard({
 
   return (
     <>
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="rounded-lg border border-border/50 bg-card p-4 transition-colors hover:border-border">
         {/* Header: type badge + company + status */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -104,7 +104,7 @@ export function TaskCard({
             >
               {taskConfig?.label || task.task_type}
             </Badge>
-            <span className="text-sm font-medium text-foreground">
+            <span className="text-lg font-medium text-foreground">
               {companyName}
             </span>
           </div>
@@ -134,14 +134,14 @@ export function TaskCard({
                     href={companyUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-blue-400 hover:underline"
+                    className="inline-flex items-center gap-1.5 text-base text-blue-400 hover:underline"
                   >
                     <ExternalLink className="size-3.5" />
                     {companyUrl}
                   </a>
                 )}
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-muted-foreground">
+                  <label className="text-base font-medium text-muted-foreground">
                     Careers Page URL
                   </label>
                   <Input
@@ -161,7 +161,7 @@ export function TaskCard({
                     href={careersPageUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-purple-400 hover:underline"
+                    className="inline-flex items-center gap-1.5 text-base text-purple-400 hover:underline"
                   >
                     <ExternalLink className="size-3.5" />
                     {careersPageUrl}
@@ -169,16 +169,16 @@ export function TaskCard({
                 )}
                 {task.filter_criteria && (
                   <div className="rounded-lg bg-muted/50 p-3">
-                    <p className="mb-1 text-xs font-medium text-muted-foreground">
+                    <p className="mb-1 text-base font-medium text-muted-foreground">
                       Filter Criteria
                     </p>
-                    <pre className="whitespace-pre-wrap text-xs text-foreground leading-relaxed">
+                    <pre className="whitespace-pre-wrap text-base text-foreground leading-relaxed">
                       {task.filter_criteria}
                     </pre>
                   </div>
                 )}
                 <div className="rounded-lg bg-muted/50 p-3">
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-base text-muted-foreground leading-relaxed">
                     <strong>Workflow:</strong> For each job found, add a job entry and fill in the URL first.
                     Check the URL status — if it says &quot;Duplicate&quot;, remove that entry and move on.
                     If it says &quot;New job&quot;, fill in the remaining fields.
@@ -194,7 +194,7 @@ export function TaskCard({
 
             {/* Notes */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">
+              <label className="text-base font-medium text-muted-foreground">
                 Notes
               </label>
               <Textarea
@@ -252,7 +252,7 @@ export function TaskCard({
 
         {/* Completed/failed: show notes if any */}
         {isDone && notes && (
-          <p className="mt-2 text-xs text-muted-foreground">{notes}</p>
+          <p className="mt-2 text-base text-muted-foreground">{notes}</p>
         )}
       </div>
 

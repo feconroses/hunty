@@ -26,8 +26,8 @@ export function AppearanceTab() {
               <Sun className="size-5 text-yellow-500" />
             )}
             <div>
-              <Label className="text-sm font-medium">Dark Mode</Label>
-              <p className="text-xs text-muted-foreground">
+              <Label className="text-base font-medium">Dark Mode</Label>
+              <p className="text-sm text-muted-foreground">
                 {isDark
                   ? "Dark theme is active"
                   : "Light theme is active"}
@@ -44,13 +44,13 @@ export function AppearanceTab() {
 
         {/* Preview */}
         <div className="rounded-lg border border-border/50 p-4">
-          <p className="text-xs font-medium text-muted-foreground mb-2">
+          <p className="text-sm font-medium text-muted-foreground mb-2">
             Preview
           </p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="size-3 rounded-full bg-[#1db954]" />
-              <span className="text-sm text-foreground">
+              <span className="text-base text-foreground">
                 Currently using{" "}
                 <span className="font-semibold">
                   {isDark ? "dark" : "light"}
@@ -58,7 +58,7 @@ export function AppearanceTab() {
                 mode
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Your interface colors and contrasts are optimized for{" "}
               {isDark ? "low-light environments" : "bright environments"}.
             </p>

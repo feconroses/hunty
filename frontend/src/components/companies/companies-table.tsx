@@ -169,7 +169,7 @@ export function CompaniesTable({
     <TableHead className={className}>
       <button
         type="button"
-        className="inline-flex items-center gap-1 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+        className="inline-flex items-center gap-1 text-sm uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
         onClick={() => handleSort(sortKeyValue)}
       >
         {label}
@@ -201,7 +201,7 @@ export function CompaniesTable({
                 sortKeyValue="last_scanned_at"
               />
               <TableHead>
-                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                <span className="text-sm uppercase tracking-wider text-muted-foreground">
                   Actions
                 </span>
               </TableHead>
@@ -279,7 +279,7 @@ export function CompaniesTable({
                   href={company.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                  className="inline-flex items-center gap-1 text-base text-primary hover:underline"
                 >
                   {truncateUrl(company.url)}
                   <ExternalLink className="size-3" />
@@ -292,7 +292,7 @@ export function CompaniesTable({
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base">
               <StatusBadge status={company.status} />
               <span className="text-muted-foreground">
                 {company.jobs_found_count} jobs
@@ -302,7 +302,7 @@ export function CompaniesTable({
               </span>
             </div>
 
-            <div className="text-sm">
+            <div className="text-base">
               {company.careers_page_url ? (
                 <a
                   href={company.careers_page_url}

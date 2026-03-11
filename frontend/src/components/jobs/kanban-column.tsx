@@ -7,7 +7,6 @@ import {
 } from "@dnd-kit/sortable";
 import type { EnrichedJob, KanbanStage } from "@/types";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { JobCard } from "./job-card";
 
 interface KanbanColumnProps {
@@ -34,27 +33,24 @@ export function KanbanColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex flex-col bg-muted/30 border border-border/50 rounded-xl p-3 min-w-[300px] max-w-[350px] min-h-[500px] shrink-0 transition-colors",
-        isOver && "border-primary/50 bg-muted/50"
+        "flex flex-col bg-muted/50 border border-border/40 rounded-xl p-2 min-w-[280px] w-[280px] min-h-[500px] shrink-0 transition-colors",
+        isOver && "bg-primary/5"
       )}
     >
       {/* Column header */}
-      <div className="flex items-center justify-between mb-3 px-1">
+      <div className="flex items-center justify-between mb-3 px-1.5 py-1">
         <div className="flex items-center gap-2">
           <div
-            className="size-2.5 rounded-full shrink-0"
+            className="size-2 rounded-full shrink-0"
             style={{ backgroundColor: stage.color }}
           />
-          <h3 className="text-sm font-semibold text-foreground truncate">
+          <h3 className="text-base font-medium uppercase tracking-wider text-muted-foreground truncate">
             {stage.name}
           </h3>
         </div>
-        <Badge
-          variant="secondary"
-          className="text-[10px] px-1.5 h-4 bg-muted text-muted-foreground tabular-nums"
-        >
+        <span className="text-base tabular-nums text-muted-foreground">
           {jobs.length}
-        </Badge>
+        </span>
       </div>
 
       {/* Sortable job list */}
@@ -73,13 +69,11 @@ export function KanbanColumn({
           {jobs.length === 0 && (
             <div
               className={cn(
-                "flex-1 flex items-center justify-center rounded-lg border-2 border-dashed border-border/40 min-h-[80px] transition-colors",
-                isOver && "border-primary/40 bg-primary/5"
+                "flex-1 flex items-center justify-center rounded-lg min-h-[80px] transition-colors",
+                isOver && "bg-primary/5"
               )}
             >
-              <p className="text-xs text-muted-foreground/60">
-                Drop jobs here
-              </p>
+              <p className="text-sm text-muted-foreground/70">No jobs</p>
             </div>
           )}
         </div>

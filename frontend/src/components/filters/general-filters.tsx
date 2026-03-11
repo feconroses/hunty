@@ -198,7 +198,7 @@ export function GeneralFilters({
           onChange={(vals) => handleKeywordsChange("title", "include", vals)}
           placeholder="e.g. Engineer, Developer, Designer"
         />
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Jobs with these words in the title will be included
         </p>
       </div>
@@ -213,7 +213,7 @@ export function GeneralFilters({
           onChange={(vals) => handleKeywordsChange("title", "exclude", vals)}
           placeholder="e.g. Intern, Manager, Director"
         />
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Jobs with these words in the title will be excluded
         </p>
       </div>
@@ -230,7 +230,7 @@ export function GeneralFilters({
           }
           placeholder="e.g. React, Python, TypeScript"
         />
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Jobs must mention these keywords in their description
         </p>
       </div>
@@ -247,7 +247,7 @@ export function GeneralFilters({
           }
           placeholder="e.g. San Francisco, New York, London"
         />
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Only show jobs from these locations
         </p>
       </div>
@@ -265,7 +265,7 @@ export function GeneralFilters({
             return (
               <label
                 key={level}
-                className="flex items-center gap-2 text-sm cursor-pointer"
+                className="flex items-center gap-2 text-base cursor-pointer"
               >
                 <Checkbox
                   checked={isChecked}
@@ -278,7 +278,7 @@ export function GeneralFilters({
             );
           })}
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Only show jobs matching these seniority levels
         </p>
       </div>
@@ -294,7 +294,7 @@ export function GeneralFilters({
             return (
               <label
                 key={wt}
-                className="flex items-center gap-2 text-sm cursor-pointer"
+                className="flex items-center gap-2 text-base cursor-pointer"
               >
                 <Checkbox
                   checked={isChecked}
@@ -307,7 +307,7 @@ export function GeneralFilters({
             );
           })}
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Only show jobs matching these work arrangements
         </p>
       </div>
@@ -343,7 +343,7 @@ export function GeneralFilters({
             </Button>
           )}
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Exclude jobs below this annual salary
         </p>
       </div>
@@ -360,7 +360,7 @@ export function GeneralFilters({
           rows={3}
           onBlur={(e) => handleFreeTextSave(e.target.value)}
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Additional instructions for the AI when evaluating job relevance
         </p>
       </div>

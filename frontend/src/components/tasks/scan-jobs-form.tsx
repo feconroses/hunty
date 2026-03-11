@@ -120,7 +120,7 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
       {jobEntries.map((entry, index) => (
         <Card key={index} size="sm" className="bg-muted/30">
           <CardHeader className="flex-row items-center justify-between border-b pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-base font-medium">
               Job {index + 1}
             </CardTitle>
             <button
@@ -135,7 +135,7 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
             {/* Row 1: Title + URL */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-sm font-medium text-muted-foreground">
                   Title
                 </label>
                 <Input
@@ -145,7 +145,7 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-sm font-medium text-muted-foreground">
                   Job URL
                 </label>
                 <Input
@@ -154,15 +154,15 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
                   onChange={(e) => updateEntry(index, "url", e.target.value)}
                 />
                 {urlStatuses[index] === "checking" && (
-                  <p className="text-xs text-muted-foreground mt-1">Checking URL...</p>
+                  <p className="text-sm text-muted-foreground mt-1">Checking URL...</p>
                 )}
                 {urlStatuses[index] === "exists" && (
-                  <p className="text-xs text-red-400 mt-1" aria-label="URL status">
+                  <p className="text-sm text-red-400 mt-1" aria-label="URL status">
                     Duplicate — this job already exists in the database
                   </p>
                 )}
                 {urlStatuses[index] === "new" && (
-                  <p className="text-xs text-green-400 mt-1" aria-label="URL status">
+                  <p className="text-sm text-green-400 mt-1" aria-label="URL status">
                     New job — not in database yet
                   </p>
                 )}
@@ -172,7 +172,7 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
             {/* Row 2: Location + Department */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-sm font-medium text-muted-foreground">
                   Location
                 </label>
                 <Input
@@ -184,7 +184,7 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-sm font-medium text-muted-foreground">
                   Department
                 </label>
                 <Input
@@ -200,13 +200,13 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
             {/* Row 3: Work Type + Seniority */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-sm font-medium text-muted-foreground">
                   Work Type
                 </label>
                 <select
                   value={entry.work_type}
                   onChange={(e) => updateEntry(index, "work_type", e.target.value)}
-                  className="h-8 w-full rounded-lg border border-border bg-transparent px-2 text-sm text-foreground"
+                  className="h-8 w-full rounded-lg border border-border bg-transparent px-2 text-base text-foreground"
                 >
                   <option value="">Select type</option>
                   {WORK_TYPE_OPTIONS.map((opt) => (
@@ -215,13 +215,13 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-sm font-medium text-muted-foreground">
                   Seniority
                 </label>
                 <select
                   value={entry.seniority_level}
                   onChange={(e) => updateEntry(index, "seniority_level", e.target.value)}
-                  className="h-8 w-full rounded-lg border border-border bg-transparent px-2 text-sm text-foreground"
+                  className="h-8 w-full rounded-lg border border-border bg-transparent px-2 text-base text-foreground"
                 >
                   <option value="">Select level</option>
                   {SENIORITY_OPTIONS.map((opt) => (
@@ -234,7 +234,7 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
             {/* Row 4: Salary + Skills */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-sm font-medium text-muted-foreground">
                   Salary Range
                 </label>
                 <Input
@@ -246,7 +246,7 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-sm font-medium text-muted-foreground">
                   Skills
                 </label>
                 <Input
@@ -261,7 +261,7 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
 
             {/* Row 5: Description */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">
+              <label className="text-sm font-medium text-muted-foreground">
                 Description Summary
               </label>
               <Textarea
@@ -277,7 +277,7 @@ export function ScanJobsForm({ companyId, jobEntries, onEntriesChange }: ScanJob
         </Card>
       ))}
 
-      <button type="button" onClick={addEntry} className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-border px-2.5 text-[0.8rem] font-medium hover:bg-muted transition-colors">
+      <button type="button" onClick={addEntry} className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-border px-2.5 text-sm font-medium hover:bg-muted transition-colors">
         <Plus className="size-3.5" />
         Add Job
       </button>

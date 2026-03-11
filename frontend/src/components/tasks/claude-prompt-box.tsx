@@ -46,7 +46,7 @@ export function ClaudePromptBox() {
         <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors hover:bg-muted/50">
           <div className="flex items-center gap-2">
             <Bot className="size-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Claude Instructions</span>
+            <span className="text-base font-medium">Claude Instructions</span>
           </div>
           {open ? (
             <ChevronUp className="size-4 text-muted-foreground" />
@@ -59,7 +59,7 @@ export function ClaudePromptBox() {
             <div className="mb-3 flex items-center justify-end">
               <CopyButton text={CLAUDE_PROMPT} label="Copy Prompt" />
             </div>
-            <pre className="whitespace-pre-wrap rounded-lg bg-muted/50 p-4 font-mono text-sm leading-relaxed text-muted-foreground">
+            <pre className="whitespace-pre-wrap rounded-lg bg-muted/50 p-4 font-mono text-base leading-relaxed text-muted-foreground">
               {CLAUDE_PROMPT}
             </pre>
           </div>

@@ -157,7 +157,7 @@ export function JobDetailPanel({
           className="w-full sm:max-w-[450px] overflow-y-auto"
         >
           <SheetHeader className="pr-8">
-            <SheetTitle className="text-lg leading-tight">
+            <SheetTitle className="text-xl leading-tight">
               {job.title}
             </SheetTitle>
             <SheetDescription>
@@ -182,7 +182,7 @@ export function JobDetailPanel({
 
             {/* Stage selector */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                 Stage
               </label>
               <Select
@@ -222,7 +222,7 @@ export function JobDetailPanel({
 
             {/* Details grid */}
             <div className="space-y-3">
-              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                 Details
               </h4>
 
@@ -242,7 +242,7 @@ export function JobDetailPanel({
                       <Badge
                         variant="outline"
                         className={cn(
-                          "text-[10px] px-1.5 h-4",
+                          "text-xs px-1.5 h-5",
                           WORK_TYPE_STYLES[job.work_type]
                         )}
                       >
@@ -288,7 +288,7 @@ export function JobDetailPanel({
               <>
                 <Separator />
                 <div className="space-y-2">
-                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                     Skills
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
@@ -296,7 +296,7 @@ export function JobDetailPanel({
                       <Badge
                         key={skill}
                         variant="secondary"
-                        className="text-xs"
+                        className="text-sm"
                       >
                         {skill}
                       </Badge>
@@ -311,10 +311,10 @@ export function JobDetailPanel({
               <>
                 <Separator />
                 <div className="space-y-2">
-                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                     Summary
                   </h4>
-                  <p className="text-sm text-foreground leading-relaxed">
+                  <p className="text-base text-foreground leading-relaxed">
                     {job.description_summary}
                   </p>
                 </div>
@@ -324,12 +324,12 @@ export function JobDetailPanel({
             {/* Full description (collapsible) */}
             {job.full_description && (
               <Collapsible>
-                <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                <CollapsibleTrigger className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                   <ChevronDown className="size-3.5 transition-transform [[data-panel-open]_&]:rotate-180" />
                   Full Description
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="mt-2 text-sm text-foreground leading-relaxed whitespace-pre-wrap rounded-lg bg-muted/30 p-3 border border-border/50 max-h-[300px] overflow-y-auto">
+                  <div className="mt-2 text-base text-foreground leading-relaxed whitespace-pre-wrap rounded-lg bg-muted/30 p-3 border border-border/50 max-h-[300px] overflow-y-auto">
                     {job.full_description}
                   </div>
                 </CollapsibleContent>
@@ -339,7 +339,7 @@ export function JobDetailPanel({
             {/* Notes */}
             <Separator />
             <div className="space-y-2">
-              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                 Notes
               </h4>
               <Textarea
@@ -347,7 +347,7 @@ export function JobDetailPanel({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 onBlur={handleNotesBlur}
-                className="min-h-[80px] text-sm"
+                className="min-h-[80px] text-base"
               />
             </div>
 
@@ -412,11 +412,11 @@ function DetailItem({
 }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <div className="flex items-center gap-1 text-[10px] text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-center gap-1 text-xs text-muted-foreground uppercase tracking-wider">
         <Icon className="size-3" />
         {label}
       </div>
-      <div className="text-sm text-foreground">{value}</div>
+      <div className="text-base text-foreground">{value}</div>
     </div>
   );
 }

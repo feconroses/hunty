@@ -196,7 +196,7 @@ function CompanyFilterGroup({
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-2 text-sm font-medium hover:text-foreground/80"
+          className="flex items-center gap-2 text-base font-medium hover:text-foreground/80"
         >
           {expanded ? (
             <ChevronDown className="size-4" />
@@ -205,7 +205,7 @@ function CompanyFilterGroup({
           )}
           <Building2 className="size-4 text-muted-foreground" />
           {companyName}
-          <span className="text-xs text-muted-foreground font-normal">
+          <span className="text-sm text-muted-foreground font-normal">
             ({rules.length} rule{rules.length !== 1 ? "s" : ""})
           </span>
         </button>
@@ -277,7 +277,7 @@ function CompanyFilterGroup({
                 return (
                   <label
                     key={level}
-                    className="flex items-center gap-2 text-sm cursor-pointer"
+                    className="flex items-center gap-2 text-base cursor-pointer"
                   >
                     <Checkbox
                       checked={isChecked}
@@ -310,7 +310,7 @@ function CompanyFilterGroup({
                 return (
                   <label
                     key={wt}
-                    className="flex items-center gap-2 text-sm cursor-pointer"
+                    className="flex items-center gap-2 text-base cursor-pointer"
                   >
                     <Checkbox
                       checked={isChecked}
@@ -478,7 +478,7 @@ export function CompanyFilters({
       </div>
 
       {companyIds.length === 0 && (
-        <p className="py-6 text-center text-sm text-muted-foreground">
+        <p className="py-6 text-center text-base text-muted-foreground">
           No company-specific filter overrides yet. Add one above to customize
           filtering for a specific company.
         </p>
