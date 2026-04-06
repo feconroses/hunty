@@ -23,6 +23,8 @@ export function useJobs() {
   const [filters, setFilters] = useState<JobFilters>({});
   const abortRef = useRef<AbortController | null>(null);
 
+  const initialLoadDone = useRef(false);
+
   const fetchJobs = useCallback(async (appliedFilters?: JobFilters) => {
     // Cancel any in-flight request
     if (abortRef.current) {
@@ -30,7 +32,8 @@ export function useJobs() {
     }
     abortRef.current = new AbortController();
 
-    setLoading(true);
+    // Only show loading skeleton on initial load, not filter changes
+    if (!initialLoadDone.current) setLoading(true);
     setError(null);
 
     try {
@@ -51,6 +54,7 @@ export function useJobs() {
       setError(message);
     } finally {
       setLoading(false);
+      initialLoadDone.current = true;
     }
   }, []);
 

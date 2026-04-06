@@ -11,11 +11,12 @@ router = APIRouter(prefix="/companies", tags=["companies"])
 
 @router.get("", response_model=list[CompanyResponse])
 async def list_companies(
+    source: str | None = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """List all companies for the authenticated user."""
-    return await CompanyService.list_companies(db, current_user.id)
+    """List all companies for the authenticated user, optionally filtered by source."""
+    return await CompanyService.list_companies(db, current_user.id, source=source)
 
 
 @router.post("", response_model=CompanyResponse, status_code=status.HTTP_201_CREATED)

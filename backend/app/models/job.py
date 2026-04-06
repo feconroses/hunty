@@ -12,8 +12,13 @@ class Job(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(sa_column=Column(Integer, ForeignKey("users.id"), nullable=False))
-    company_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("companies.id"), nullable=False)
+    company_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("companies.id"), nullable=True),
+    )
+    linkedin_search_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("linkedin_searches.id"), nullable=True),
     )
     title: str = Field(max_length=500)
     url: Optional[str] = Field(default=None, max_length=1024)
@@ -25,6 +30,7 @@ class Job(SQLModel, table=True):
     seniority_level: Optional[SeniorityLevel] = Field(default=None)
     department: Optional[str] = Field(default=None, max_length=255)
     skills: Any = Field(default=[], sa_column=Column(JSON, nullable=False, server_default="[]"))
+    language_requirements: Optional[str] = Field(default=None, max_length=500)
     description_summary: Optional[str] = Field(
         default=None, sa_column=Column(Text, nullable=True)
     )

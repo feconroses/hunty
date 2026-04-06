@@ -16,6 +16,10 @@ class Task(SQLModel, table=True):
         default=None,
         sa_column=Column(Integer, ForeignKey("companies.id"), nullable=True),
     )
+    linkedin_search_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("linkedin_searches.id"), nullable=True),
+    )
     task_type: TaskType
     status: TaskStatus = Field(default=TaskStatus.pending)
     queue: TaskQueue = Field(default=TaskQueue.queue)

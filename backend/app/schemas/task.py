@@ -6,7 +6,22 @@ from pydantic import BaseModel
 
 class CreateTaskRequest(BaseModel):
     company_id: int | None = None
+    linkedin_search_id: int | None = None
     task_type: str
+
+
+class AddJobToTaskRequest(BaseModel):
+    title: str
+    company_name: str | None = None
+    url: str | None = None
+    location: str | None = None
+    work_type: str | None = None
+    salary_range: str | None = None
+    seniority_level: str | None = None
+    department: str | None = None
+    skills: list[str] = []
+    language_requirements: str | None = None
+    description_summary: str | None = None
 
 
 class CompleteTaskRequest(BaseModel):
@@ -36,6 +51,7 @@ class TaskResponse(BaseModel):
     id: int
     user_id: int
     company_id: int | None = None
+    linkedin_search_id: int | None = None
     task_type: str
     status: str
     queue: str
@@ -52,5 +68,8 @@ class TaskResponse(BaseModel):
     company_url: str | None = None
     careers_page_url: str | None = None
     filter_criteria: str | None = None
+    linkedin_search_name: str | None = None
+    linkedin_search_url: str | None = None
+    linkedin_search_location: str | None = None
 
     model_config = {"from_attributes": True}

@@ -27,6 +27,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const USER_STORAGE_KEY = "hunty_user_data";
 
+// Re-export for local use; canonical implementation lives in api.ts
 function parseTokenExpiry(token: string): number | null {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -53,13 +54,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (accessToken: string) => {
       clearRefreshTimer();
       const expiry = parseTokenExpiry(accessToken);
-      if (!expiry) return;
+      if (!expiry) {
+        console.warn("[auth] scheduleTokenRefresh: could not parse token expiry");
+        return;
+      }
 
       // Refresh 1 minute before expiry
       const refreshIn = expiry - Date.now() - 60_000;
-      if (refreshIn <= 0) return;
+      if (refreshIn <= 0) {
+        console.warn(`[auth] scheduleTokenRefresh: refreshIn=${Math.round(refreshIn / 1000)}s (token expires in ${Math.round((expiry - Date.now()) / 1000)}s) — NOT scheduling, relying on request interceptor`);
+        return;
+      }
 
+      console.log(`[auth] Token refresh scheduled in ${Math.round(refreshIn / 1000)}s`);
       refreshTimerRef.current = setTimeout(async () => {
+        console.log("[auth] Scheduled token refresh firing");
         try {
           const response = await api.refreshToken();
           api.setAccessToken(response.access_token);
@@ -68,12 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(response.user);
             localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(response.user));
           }
+          console.log("[auth] Scheduled token refresh succeeded");
           scheduleTokenRefresh(response.access_token);
         } catch {
-          // Refresh failed — clear session
-          api.clearTokens();
-          setUser(null);
-          localStorage.removeItem(USER_STORAGE_KEY);
+          // Don't nuke the session: the visibility handler or request interceptor
+          // will retry. The httpOnly refresh cookie is still valid (30 days).
+          console.warn("[auth] Scheduled token refresh failed — will retry on next visibility change or API call");
         }
       }, refreshIn);
     },
@@ -82,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const performLogin = useCallback(
     (response: { access_token: string; csrf_token: string; user: User }) => {
+      console.log("[auth] performLogin — storing tokens and scheduling refresh");
       api.setAccessToken(response.access_token);
       api.setCsrfToken(response.csrf_token);
       setUser(response.user);
@@ -118,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    console.log("[auth] logout() called");
     setIsLoading(true);
     try {
       await api.logout();
@@ -140,11 +151,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // On mount: attempt silent refresh
   useEffect(() => {
     async function initAuth() {
+      console.log("[auth] initAuth starting on", window.location.pathname);
       const stored = localStorage.getItem(USER_STORAGE_KEY);
       if (stored) {
         try {
           const cachedUser = JSON.parse(stored) as User;
           setUser(cachedUser);
+          console.log("[auth] Restored cached user from localStorage");
         } catch {
           localStorage.removeItem(USER_STORAGE_KEY);
         }
@@ -157,12 +170,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(response.user);
         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(response.user));
         scheduleTokenRefresh(response.access_token);
-      } catch {
-        // No valid session — clear everything and ensure cookie is removed
+        console.log("[auth] initAuth succeeded — session restored");
+      } catch (err: unknown) {
+        const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+        console.warn("[auth] initAuth refresh failed:", detail || err);
         api.clearTokens();
         setUser(null);
         localStorage.removeItem(USER_STORAGE_KEY);
-        try { await api.logout(); } catch { /* ignore */ }
       } finally {
         setIsInitializing(false);
       }
@@ -176,6 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     function handleStorageChange(event: StorageEvent) {
       if (event.key === USER_STORAGE_KEY && event.newValue === null) {
+        console.log("[auth] Storage change detected — user data cleared in another tab");
         api.clearTokens();
         clearRefreshTimer();
         setUser(null);
@@ -185,6 +200,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [clearRefreshTimer]);
+
+  // Proactive refresh when tab becomes visible (handles background tab throttling)
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState !== "visible") return;
+
+      const token = api.getAccessToken();
+      if (!token) {
+        console.log("[auth] Visibility change: no access token, skipping refresh");
+        return;
+      }
+
+      const expiry = parseTokenExpiry(token);
+      if (!expiry) return;
+
+      // If token expires within 2 minutes, refresh now
+      const timeLeft = expiry - Date.now();
+      console.log(`[auth] Tab became visible — token expires in ${Math.round(timeLeft / 1000)}s`);
+      if (timeLeft < 2 * 60 * 1000) {
+        console.log("[auth] Token near expiry — proactive refresh on visibility change");
+        api
+          .refreshToken()
+          .then((response) => {
+            api.setAccessToken(response.access_token);
+            api.setCsrfToken(response.csrf_token);
+            if (response.user) {
+              setUser(response.user);
+              localStorage.setItem(
+                USER_STORAGE_KEY,
+                JSON.stringify(response.user)
+              );
+            }
+            console.log("[auth] Visibility-based refresh succeeded");
+            scheduleTokenRefresh(response.access_token);
+          })
+          .catch(() => {
+            console.warn("[auth] Visibility-based refresh failed — session may be expired");
+            // Don't nuke the session here either; let the request interceptor handle it
+          });
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [scheduleTokenRefresh]);
 
   // Clean up timer on unmount
   useEffect(() => {

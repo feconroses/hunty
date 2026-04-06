@@ -39,14 +39,34 @@ export interface ResetPasswordRequest {
 // ─── Companies ───────────────────────────────────────────────────────────────
 
 export type CompanyStatus = "pending" | "active" | "error";
+export type CompanySource = "target" | "discovered";
 
 export interface Company {
   id: number;
   user_id: number;
   name: string;
-  url: string;
+  url: string | null;
   careers_page_url: string | null;
+  source: CompanySource;
   status: CompanyStatus;
+  last_scanned_at: string | null;
+  jobs_found_count: number;
+  pending_tasks_count: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ─── LinkedIn Searches ──────────────────────────────────────────────────────
+
+export interface LinkedInSearch {
+  id: number;
+  user_id: number;
+  keywords: string;
+  location: string | null;
+  geo_id: string;
+  employment_types: string[] | null;
+  linkedin_url: string | null;
+  is_active: boolean;
   last_scanned_at: string | null;
   jobs_found_count: number;
   pending_tasks_count: number | null;
@@ -57,12 +77,16 @@ export interface Company {
 // ─── Jobs ────────────────────────────────────────────────────────────────────
 
 export type WorkType = "remote" | "hybrid" | "onsite";
-export type SeniorityLevel = "junior" | "mid" | "senior" | "lead" | "executive";
+export type SeniorityLevel =
+  | "intern" | "junior" | "mid" | "senior" | "staff" | "principal" | "distinguished"
+  | "team_lead" | "manager" | "senior_manager" | "head" | "director" | "senior_director" | "vp" | "senior_vp" | "c_suite"
+  | "lead" | "executive";
 
 export interface Job {
   id: number;
   user_id: number;
-  company_id: number;
+  company_id: number | null;
+  linkedin_search_id: number | null;
   title: string;
   url: string | null;
   location: string | null;
@@ -73,6 +97,7 @@ export interface Job {
   seniority_level: SeniorityLevel | null;
   department: string | null;
   skills: string[];
+  language_requirements: string | null;
   description_summary: string | null;
   full_description: string | null;
   notes: string | null;
@@ -99,9 +124,19 @@ export interface KanbanStage {
   created_at: string;
 }
 
+// ─── Saved Job Summary ──────────────────────────────────────────────────────
+
+export interface SavedJobSummary {
+  job_id: number;
+  title: string;
+  company_name: string | null;
+  url: string | null;
+  saved_at: string;
+}
+
 // ─── Tasks ───────────────────────────────────────────────────────────────────
 
-export type TaskType = "find_careers_page" | "scan_jobs";
+export type TaskType = "find_careers_page" | "scan_careers_page" | "scan_linkedin";
 export type TaskStatus = "pending" | "completed" | "failed";
 export type TaskQueue = "today" | "queue" | "scheduled";
 
@@ -109,6 +144,7 @@ export interface Task {
   id: number;
   user_id: number;
   company_id: number | null;
+  linkedin_search_id: number | null;
   task_type: TaskType;
   status: TaskStatus;
   queue: TaskQueue;
@@ -125,10 +161,14 @@ export interface Task {
   company_url: string | null;
   careers_page_url: string | null;
   filter_criteria: string | null;
+  linkedin_search_name: string | null;
+  linkedin_search_url: string | null;
+  linkedin_search_location: string | null;
 }
 
 export interface CreateTaskRequest {
-  company_id: number;
+  company_id?: number;
+  linkedin_search_id?: number;
   task_type: TaskType;
   queue?: TaskQueue;
   notes?: string;
@@ -148,14 +188,16 @@ export interface FilterRule {
   id: number;
   user_id: number;
   company_id: number | null;
+  linkedin_search_id: number | null;
   rule_type: FilterRuleType;
   value: string;
+  logic_group: string | null;
   created_at: string;
 }
 
 // ─── Activity Log ────────────────────────────────────────────────────────────
 
-export type EntityType = "company" | "job" | "task" | "filter" | "kanban_stage";
+export type EntityType = "company" | "job" | "task" | "filter" | "kanban_stage" | "linkedin_search";
 
 export interface ActivityLogEntry {
   id: number;

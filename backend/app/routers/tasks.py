@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import get_current_user, get_db
 from app.models.user import User
 from app.schemas.task import (
+    AddJobToTaskRequest,
     BulkMoveTasksRequest,
     CompleteTaskRequest,
     CreateTaskRequest,
@@ -74,6 +75,17 @@ async def delete_task(
 ):
     """Delete a task."""
     await TaskService.delete_task(db, current_user.id, task_id)
+
+
+@router.post("/{task_id}/jobs", response_model=TaskResponse)
+async def add_job_to_task(
+    task_id: int,
+    data: AddJobToTaskRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Save a single job during a scan task (incremental save)."""
+    return await TaskService.add_job_to_task(db, current_user.id, task_id, data)
 
 
 @router.post("/{task_id}/complete", response_model=TaskResponse)

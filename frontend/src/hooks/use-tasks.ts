@@ -11,6 +11,7 @@ interface UseTasksReturn {
   todayTasks: Task[];
   queueTasks: Task[];
   scheduledTasks: Task[];
+  completedTasks: Task[];
   fetchTasks: () => Promise<void>;
   createTask: (data: CreateTaskRequest) => Promise<Task>;
   completeTask: (id: number, notes?: string, resultData?: Record<string, unknown>) => Promise<Task>;
@@ -133,6 +134,18 @@ export function useTasks(): UseTasksReturn {
     [tasks],
   );
 
+  const completedTasks = useMemo(
+    () =>
+      tasks
+        .filter((t) => t.status === "completed" || t.status === "failed")
+        .sort((a, b) => {
+          const aTime = a.completed_at ? new Date(a.completed_at).getTime() : 0;
+          const bTime = b.completed_at ? new Date(b.completed_at).getTime() : 0;
+          return bTime - aTime;
+        }),
+    [tasks],
+  );
+
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
@@ -144,6 +157,7 @@ export function useTasks(): UseTasksReturn {
     todayTasks,
     queueTasks,
     scheduledTasks,
+    completedTasks,
     fetchTasks,
     createTask,
     completeTask,

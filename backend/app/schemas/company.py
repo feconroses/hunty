@@ -20,8 +20,9 @@ class CompanyResponse(BaseModel):
     id: int
     user_id: int
     name: str
-    url: str
+    url: str | None = None
     careers_page_url: str | None = None
+    source: str = "target"
     status: str
     last_scanned_at: datetime | None = None
     jobs_found_count: int = 0

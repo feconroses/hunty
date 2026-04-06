@@ -26,6 +26,7 @@ async def list_jobs(
     company_id: Optional[int] = Query(default=None),
     work_type: Optional[str] = Query(default=None),
     seniority_level: Optional[str] = Query(default=None),
+    location: Optional[str] = Query(default=None),
     search: Optional[str] = Query(default=None),
     limit: int = Query(default=100, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
@@ -40,6 +41,7 @@ async def list_jobs(
         company_id=company_id,
         work_type=work_type,
         seniority_level=seniority_level,
+        location=location,
         search=search,
         limit=limit,
         offset=offset,
@@ -53,12 +55,11 @@ async def check_job_url(
     db: AsyncSession = Depends(get_db),
 ):
     """Check if a job URL already exists for a given company."""
+    conditions = [Job.user_id == current_user.id, Job.url == data.url]
+    if data.company_id is not None:
+        conditions.append(Job.company_id == data.company_id)
     result = await db.execute(
-        select(Job.id).where(
-            Job.user_id == current_user.id,
-            Job.company_id == data.company_id,
-            Job.url == data.url,
-        ).limit(1)
+        select(Job.id).where(*conditions).limit(1)
     )
     return {"exists": result.scalar_one_or_none() is not None}
 

@@ -24,13 +24,14 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { SortableTaskCard } from "./sortable-task-card";
 import { TaskCard } from "./task-card";
-import { ListTodo, Inbox, CalendarClock } from "lucide-react";
+import { ListTodo, Inbox, CalendarClock, CheckCircle2 } from "lucide-react";
 import type { Task, TaskQueue } from "@/types";
 
 interface TaskQueueTabsProps {
   todayTasks: Task[];
   queueTasks: Task[];
   scheduledTasks: Task[];
+  completedTasks: Task[];
   onComplete: (
     id: number,
     notes?: string,
@@ -49,6 +50,7 @@ export function TaskQueueTabs({
   todayTasks,
   queueTasks,
   scheduledTasks,
+  completedTasks,
   onComplete,
   onFail,
   onDelete,
@@ -233,6 +235,15 @@ export function TaskQueueTabs({
               {scheduledTasks.length}
             </Badge>
           </TabsTrigger>
+          <TabsTrigger value="completed" className="gap-1.5">
+            Completed
+            <Badge
+              variant="secondary"
+              className="ml-1 size-5 items-center justify-center rounded-full px-0 text-[10px]"
+            >
+              {completedTasks.length}
+            </Badge>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="today">
@@ -243,6 +254,27 @@ export function TaskQueueTabs({
         </TabsContent>
         <TabsContent value="scheduled">
           {renderTaskList(scheduledTasks, "scheduled")}
+        </TabsContent>
+        <TabsContent value="completed">
+          {completedTasks.length === 0 ? (
+            <EmptyState
+              icon={CheckCircle2}
+              title="No completed tasks"
+              description="Tasks will appear here after you mark them as complete or failed."
+            />
+          ) : (
+            <div className="space-y-3">
+              {completedTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onComplete={onComplete}
+                  onFail={onFail}
+                  onDelete={onDelete}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 

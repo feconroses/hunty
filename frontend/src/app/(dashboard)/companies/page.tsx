@@ -69,7 +69,7 @@ export default function CompaniesPage() {
   const handleCreateTask = async (companyId: number, taskType: TaskType) => {
     const company = companies.find((c) => c.id === companyId);
     const taskLabel =
-      taskType === "find_careers_page" ? "Find Careers Page" : "Scan Jobs";
+      taskType === "find_careers_page" ? "Find Careers Page" : "Scan Careers Page";
     try {
       await createTask(companyId, taskType);
       toast.success("Task created", {

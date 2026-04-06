@@ -10,10 +10,9 @@ import { StatusChip } from "@/components/shared/status-chip";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   ScanJobsForm,
-  jobEntriesToResultData,
-  type JobEntry,
+  type ScanJobsFormHandle,
 } from "./scan-jobs-form";
-import type { Task } from "@/types";
+import type { Task, SavedJobSummary } from "@/types";
 import { TASK_TYPE_CONFIG } from "@/lib/constants";
 
 interface TaskCardProps {
@@ -28,9 +27,55 @@ interface TaskCardProps {
   isLoading?: boolean;
 }
 
+function formatCompletedTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+
+  const timeStr = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  // Check if same calendar day
+  const isToday =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+
+  if (isToday) return `Today at ${timeStr}`;
+
+  // Check if yesterday
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday =
+    date.getFullYear() === yesterday.getFullYear() &&
+    date.getMonth() === yesterday.getMonth() &&
+    date.getDate() === yesterday.getDate();
+
+  if (isYesterday) return `Yesterday at ${timeStr}`;
+
+  // Same year: "Jan 11 at 1:30 PM"
+  if (date.getFullYear() === now.getFullYear()) {
+    const dayStr = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+    return `${dayStr} at ${timeStr}`;
+  }
+
+  // Different year: "Jan 11, 2025 at 1:30 PM"
+  const fullStr = date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return `${fullStr} at ${timeStr}`;
+}
+
 const TASK_TYPE_STYLES: Record<string, string> = {
   find_careers_page: "bg-blue-500/20 text-blue-400 border-blue-500/25",
-  scan_jobs: "bg-purple-500/20 text-purple-400 border-purple-500/25",
+  scan_careers_page: "bg-purple-500/20 text-purple-400 border-purple-500/25",
+  scan_linkedin: "bg-blue-500/20 text-blue-400 border-blue-500/25",
 };
 
 export function TaskCard({
@@ -41,9 +86,10 @@ export function TaskCard({
   isLoading = false,
 }: TaskCardProps) {
   const actionRef = useRef<HTMLSelectElement>(null);
+  const scanFormRef = useRef<ScanJobsFormHandle>(null);
+  const [localTask, setLocalTask] = useState(task);
   const [notes, setNotes] = useState(task.notes || "");
   const [careersUrl, setCareersUrl] = useState("");
-  const [jobEntries, setJobEntries] = useState<JobEntry[]>([]);
   const [completing, setCompleting] = useState(false);
   const [failing, setFailing] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -53,20 +99,38 @@ export function TaskCard({
   const companyName = task.company_name || "Unknown";
   const companyUrl = task.company_url ?? undefined;
   const careersPageUrl = task.careers_page_url ?? undefined;
+  const linkedinSearchName = task.linkedin_search_name ?? undefined;
+  const linkedinSearchUrl = task.linkedin_search_url ?? undefined;
+  const linkedinSearchLocation = task.linkedin_search_location ?? undefined;
+
+  const savedJobs = ((localTask.result_data as Record<string, unknown>)?.saved_jobs as SavedJobSummary[]) || [];
 
   const isCompleted = task.status === "completed";
   const isFailed = task.status === "failed";
   const isDone = isCompleted || isFailed;
   const busy = completing || failing || isLoading;
 
+  const handleJobSaved = (updatedTask: Task) => {
+    setLocalTask(updatedTask);
+  };
+
   const handleComplete = async () => {
     setCompleting(true);
     try {
+      // Save any unsaved job entry in the scan form
+      if (
+        task.task_type === "scan_careers_page" ||
+        task.task_type === "scan_linkedin"
+      ) {
+        if (scanFormRef.current) {
+          const saved = await scanFormRef.current.saveActiveEntry();
+          if (!saved) return;
+        }
+      }
+
       let resultData: Record<string, unknown> | undefined;
       if (task.task_type === "find_careers_page" && careersUrl.trim()) {
         resultData = { careers_url: careersUrl.trim() };
-      } else if (task.task_type === "scan_jobs" && jobEntries.length > 0) {
-        resultData = jobEntriesToResultData(jobEntries);
       }
       await onComplete(task.id, notes || undefined, resultData);
     } finally {
@@ -105,7 +169,9 @@ export function TaskCard({
               {taskConfig?.label || task.task_type}
             </Badge>
             <span className="text-lg font-medium text-foreground">
-              {companyName}
+              {task.task_type === "scan_linkedin"
+                ? `${linkedinSearchName || "LinkedIn Search"}${linkedinSearchLocation ? ` — ${linkedinSearchLocation}` : ""}`
+                : companyName}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -154,7 +220,7 @@ export function TaskCard({
               </>
             )}
 
-            {task.task_type === "scan_jobs" && (
+            {task.task_type === "scan_careers_page" && (
               <>
                 {careersPageUrl && (
                   <a
@@ -179,15 +245,62 @@ export function TaskCard({
                 )}
                 <div className="rounded-lg bg-muted/50 p-3">
                   <p className="text-base text-muted-foreground leading-relaxed">
-                    <strong>Workflow:</strong> For each job found, add a job entry and fill in the URL first.
+                    <strong>Workflow:</strong> For each job found, click &quot;Add Job&quot; and fill in the URL first.
                     Check the URL status — if it says &quot;Duplicate&quot;, remove that entry and move on.
-                    If it says &quot;New job&quot;, fill in the remaining fields.
+                    If it says &quot;New job&quot;, fill in the remaining fields, then click &quot;Add Job&quot; again to save it and start the next one.
+                    Jobs are saved automatically as you add new ones.
                   </p>
                 </div>
                 <ScanJobsForm
+                  ref={scanFormRef}
+                  taskId={task.id}
                   companyId={task.company_id}
-                  jobEntries={jobEntries}
-                  onEntriesChange={setJobEntries}
+                  savedJobs={savedJobs}
+                  onJobSaved={handleJobSaved}
+                />
+              </>
+            )}
+
+            {task.task_type === "scan_linkedin" && (
+              <>
+                {linkedinSearchUrl && (
+                  <a
+                    href={linkedinSearchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-base text-blue-400 hover:underline"
+                  >
+                    <ExternalLink className="size-3.5" />
+                    Open LinkedIn Search
+                  </a>
+                )}
+                {task.filter_criteria && (
+                  <div className="rounded-lg bg-muted/50 p-3">
+                    <p className="mb-1 text-base font-medium text-muted-foreground">
+                      Filter Criteria
+                    </p>
+                    <pre className="whitespace-pre-wrap text-base text-foreground leading-relaxed">
+                      {task.filter_criteria}
+                    </pre>
+                  </div>
+                )}
+                <div className="rounded-lg bg-muted/50 p-3">
+                  <p className="text-base text-muted-foreground leading-relaxed">
+                    <strong>Workflow:</strong> Navigate to the LinkedIn search URL above. Click on each job card
+                    on the left panel to open its full description on the right panel. Read the full description
+                    to determine if the job is relevant based on the filter criteria. For each relevant job,
+                    click &quot;Add Job&quot; and fill in the URL first. Check the URL status — if &quot;Duplicate&quot;, remove
+                    and move on. If &quot;New job&quot;, fill in the remaining fields, then click &quot;Add Job&quot; again to save it.
+                    Jobs are saved automatically as you add new ones.
+                  </p>
+                </div>
+                <ScanJobsForm
+                  ref={scanFormRef}
+                  taskId={task.id}
+                  companyId={null}
+                  savedJobs={savedJobs}
+                  onJobSaved={handleJobSaved}
+                  showCompanyName
                 />
               </>
             )}
@@ -250,9 +363,18 @@ export function TaskCard({
           </div>
         )}
 
-        {/* Completed/failed: show notes if any */}
-        {isDone && notes && (
-          <p className="mt-2 text-base text-muted-foreground">{notes}</p>
+        {/* Completed/failed: show timestamp and notes */}
+        {isDone && (
+          <div className="mt-2 space-y-1">
+            {task.completed_at && (
+              <p className="text-sm text-muted-foreground">
+                {formatCompletedTime(task.completed_at)}
+              </p>
+            )}
+            {notes && (
+              <p className="text-base text-muted-foreground">{notes}</p>
+            )}
+          </div>
         )}
       </div>
 

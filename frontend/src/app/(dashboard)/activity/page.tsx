@@ -16,6 +16,7 @@ const ENTITY_TYPE_OPTIONS = [
   { value: "task", label: "Tasks" },
   { value: "job", label: "Jobs" },
   { value: "company", label: "Companies" },
+  { value: "linkedin_search", label: "LinkedIn Searches" },
   { value: "filter", label: "Filters" },
   { value: "kanban_stage", label: "Pipeline Stages" },
 ];

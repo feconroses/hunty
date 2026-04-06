@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import type { Company } from "@/types";
 import type { JobFilters } from "@/hooks/use-jobs";
@@ -8,11 +9,18 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { WORK_TYPES, SENIORITY_LEVELS } from "@/lib/constants";
+import {
+  WORK_TYPES,
+  IC_SENIORITY_LEVELS,
+  MANAGEMENT_SENIORITY_LEVELS,
+  SENIORITY_LABELS,
+} from "@/lib/constants";
 
 const WORK_TYPE_LABELS: Record<string, string> = {
   remote: "Remote",
@@ -20,13 +28,6 @@ const WORK_TYPE_LABELS: Record<string, string> = {
   onsite: "Onsite",
 };
 
-const SENIORITY_LABELS: Record<string, string> = {
-  junior: "Junior",
-  mid: "Mid",
-  senior: "Senior",
-  lead: "Lead",
-  executive: "Executive",
-};
 
 interface KanbanFiltersProps {
   filters: JobFilters;
@@ -39,6 +40,30 @@ export function KanbanFilters({
   onFiltersChange,
   companies,
 }: KanbanFiltersProps) {
+  const [localLocation, setLocalLocation] = useState(filters.location ?? "");
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Sync local state when filters change externally (e.g., Clear button)
+  useEffect(() => {
+    setLocalLocation(filters.location ?? "");
+  }, [filters.location]);
+
+  // Debounce location filter
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const value = localLocation.trim() || undefined;
+      if (value !== (filters.location || undefined)) {
+        onFiltersChange({ ...filters, location: value });
+      }
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+    // Only re-run when localLocation changes, not when filters change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localLocation]);
+
   const hasActiveFilters = Object.values(filters).some(
     (v) => v !== undefined && v !== ""
   );
@@ -107,24 +132,35 @@ export function KanbanFilters({
             updateFilter("seniority", val === "__all__" ? undefined : val)
           }
         >
-          <SelectTrigger size="sm" className="w-[130px]">
+          <SelectTrigger size="sm" className="w-[160px]">
             <SelectValue placeholder="Seniority" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="__all__">All Levels</SelectItem>
-            {SENIORITY_LEVELS.map((level) => (
-              <SelectItem key={level} value={level}>
-                {SENIORITY_LABELS[level]}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              <SelectLabel>IC</SelectLabel>
+              {IC_SENIORITY_LEVELS.map((level) => (
+                <SelectItem key={level} value={level}>
+                  {SENIORITY_LABELS[level]}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+            <SelectGroup>
+              <SelectLabel>Management</SelectLabel>
+              {MANAGEMENT_SENIORITY_LEVELS.map((level) => (
+                <SelectItem key={level} value={level}>
+                  {SENIORITY_LABELS[level]}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
 
-        {/* Location filter */}
+        {/* Location filter (debounced) */}
         <Input
           placeholder="Search location..."
-          value={filters.location ?? ""}
-          onChange={(e) => updateFilter("location", e.target.value || undefined)}
+          value={localLocation}
+          onChange={(e) => setLocalLocation(e.target.value)}
           className="w-[160px] h-7 text-xs"
         />
 

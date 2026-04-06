@@ -12,6 +12,7 @@ from app.routers import (
     filters,
     jobs,
     kanban_stages,
+    linkedin_searches,
     settings as settings_router,
     tasks,
 )
@@ -48,6 +49,7 @@ app.include_router(jobs.router, prefix="/api")
 app.include_router(tasks.router, prefix="/api")
 app.include_router(filters.router, prefix="/api")
 app.include_router(kanban_stages.router, prefix="/api")
+app.include_router(linkedin_searches.router, prefix="/api")
 app.include_router(activity_log.router, prefix="/api")
 app.include_router(settings_router.router, prefix="/api")
 

@@ -13,7 +13,7 @@ function TasksSkeleton() {
     <div className="space-y-4">
       {/* Tabs skeleton */}
       <div className="flex gap-4">
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
             className="h-8 w-24 animate-pulse rounded-md bg-muted"
@@ -38,6 +38,7 @@ export default function TasksPage() {
     todayTasks,
     queueTasks,
     scheduledTasks,
+    completedTasks,
     completeTask,
     failTask,
     deleteTask,
@@ -146,6 +147,7 @@ export default function TasksPage() {
           todayTasks={todayTasks}
           queueTasks={queueTasks}
           scheduledTasks={scheduledTasks}
+          completedTasks={completedTasks}
           onComplete={handleComplete}
           onFail={handleFail}
           onDelete={handleDelete}

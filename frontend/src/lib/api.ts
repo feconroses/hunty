@@ -17,36 +17,70 @@ import type {
   CreateTaskRequest,
   CompleteTaskRequest,
   FilterRule,
+  LinkedInSearch,
   ActivityLogEntry,
   Settings,
   UpdateProfileRequest,
   ChangePasswordRequest,
 } from "@/types";
 
-// ─── Token Storage (in-memory only — never persisted to localStorage) ────────
+// ─── Token Storage (in-memory + localStorage for resilience) ─────────────────
 
 let accessToken: string | null = null;
 let csrfToken: string | null = null;
 
+const ACCESS_TOKEN_KEY = "hunty_access_token";
+const CSRF_TOKEN_KEY = "hunty_csrf_token";
+
 export function setAccessToken(token: string) {
   accessToken = token;
+  try { localStorage.setItem(ACCESS_TOKEN_KEY, token); } catch {}
+  const expiry = parseTokenExpiry(token);
+  console.log(`[api] setAccessToken — expires in ${expiry ? Math.round((expiry - Date.now()) / 1000) : '?'}s`);
 }
 
 export function getAccessToken(): string | null {
-  return accessToken;
+  if (accessToken) return accessToken;
+  try {
+    const stored = localStorage.getItem(ACCESS_TOKEN_KEY);
+    if (stored) { accessToken = stored; return stored; }
+  } catch {}
+  return null;
 }
 
 export function setCsrfToken(token: string) {
   csrfToken = token;
+  try { localStorage.setItem(CSRF_TOKEN_KEY, token); } catch {}
 }
 
 export function getCsrfToken(): string | null {
-  return csrfToken;
+  if (csrfToken) return csrfToken;
+  try {
+    const stored = localStorage.getItem(CSRF_TOKEN_KEY);
+    if (stored) { csrfToken = stored; return stored; }
+  } catch {}
+  return null;
 }
 
 export function clearTokens() {
+  console.log("[api] clearTokens called");
   accessToken = null;
   csrfToken = null;
+  try {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(CSRF_TOKEN_KEY);
+  } catch {}
+}
+
+// ─── Token Expiry Parsing ────────────────────────────────────────────────────
+
+export function parseTokenExpiry(token: string): number | null {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.exp ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
 }
 
 // ─── Axios Instance ──────────────────────────────────────────────────────────
@@ -59,19 +93,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// ─── Request Interceptor ─────────────────────────────────────────────────────
-
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  }
-  if (csrfToken) {
-    config.headers["X-CSRF-Token"] = csrfToken;
-  }
-  return config;
-});
-
-// ─── Response Interceptor (401 refresh logic) ────────────────────────────────
+// ─── Auth Endpoints (skip for interceptor pre-checks) ───────────────────────
 
 const AUTH_ENDPOINTS = [
   "/api/auth/login",
@@ -80,6 +102,49 @@ const AUTH_ENDPOINTS = [
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
 ];
+
+// ─── Request Interceptor ─────────────────────────────────────────────────────
+
+let isPreRefreshing = false;
+
+api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  // Pre-check: if access token is expired or about to expire, refresh first
+  const isAuthEndpoint = AUTH_ENDPOINTS.some((ep) => config.url?.includes(ep));
+
+  if (!isAuthEndpoint && !isPreRefreshing) {
+    const token = getAccessToken();
+    if (token) {
+      const expiry = parseTokenExpiry(token);
+      if (expiry && expiry - Date.now() < 30_000) {
+        console.log(`[api] Request interceptor: token expires in ${Math.round((expiry - Date.now()) / 1000)}s — pre-refreshing before ${config.url}`);
+        isPreRefreshing = true;
+        try {
+          const response = await refreshToken();
+          setAccessToken(response.access_token);
+          setCsrfToken(response.csrf_token);
+          console.log("[api] Pre-refresh succeeded");
+        } catch (err) {
+          console.warn("[api] Pre-refresh failed, letting 401 interceptor handle it", err);
+        } finally {
+          isPreRefreshing = false;
+        }
+      }
+    }
+  }
+
+  // Always attach current tokens (may have been refreshed above)
+  const currentToken = getAccessToken();
+  if (currentToken) {
+    config.headers.Authorization = `Bearer ${currentToken}`;
+  }
+  const csrf = getCsrfToken();
+  if (csrf) {
+    config.headers["X-CSRF-Token"] = csrf;
+  }
+  return config;
+});
+
+// ─── Response Interceptor (401 refresh logic) ────────────────────────────────
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -115,8 +180,11 @@ api.interceptors.response.use(
       !isAuthEndpoint &&
       !originalRequest._retry
     ) {
+      const detail = error.response?.data && typeof error.response.data === "object" && "detail" in error.response.data ? (error.response.data as { detail?: string }).detail : undefined;
+      console.warn(`[api] 401 on ${originalRequest.url} — "${detail || "no detail"}" — attempting refresh (isRefreshing=${isRefreshing}, queueLen=${failedQueue.length})`);
       if (isRefreshing) {
         // Queue this request until the refresh completes
+        console.log(`[api] Refresh already in progress — queuing ${originalRequest.url}`);
         return new Promise((resolve, reject) => {
           failedQueue.push({
             resolve: (token: string | null) => {
@@ -139,13 +207,15 @@ api.interceptors.response.use(
         setCsrfToken(newTokens.csrf_token);
         processQueue(null, newTokens.access_token);
         originalRequest.headers.Authorization = `Bearer ${newTokens.access_token}`;
+        console.log(`[api] 401 recovery succeeded — retrying ${originalRequest.url}`);
         return api(originalRequest);
       } catch (refreshError) {
+        console.error("[api] 401 recovery FAILED — refresh token rejected. Redirecting to /login", refreshError);
         processQueue(refreshError, null);
         clearTokens();
         // Redirect to login if on client side
         if (typeof window !== "undefined") {
-          window.location.href = "/login";
+          window.location.href = "/login?expired";
         }
         return Promise.reject(refreshError);
       } finally {
@@ -176,8 +246,18 @@ export async function logout(): Promise<void> {
 
 export async function refreshToken(): Promise<AuthResponse> {
   // Refresh token is sent automatically via httpOnly cookie
-  const response = await api.post<AuthResponse>("/api/auth/refresh");
-  return response.data;
+  console.log("[api] refreshToken() called");
+  try {
+    const response = await api.post<AuthResponse>("/api/auth/refresh");
+    const expiry = parseTokenExpiry(response.data.access_token);
+    console.log(`[api] refreshToken() succeeded — new token expires in ${expiry ? Math.round((expiry - Date.now()) / 1000) : '?'}s`);
+    return response.data;
+  } catch (err) {
+    const detail = (err as AxiosError<{ detail?: string }>)?.response?.data?.detail;
+    const status = (err as AxiosError)?.response?.status;
+    console.error(`[api] refreshToken() FAILED — status=${status}, detail="${detail || 'unknown'}"`);
+    throw err;
+  }
 }
 
 export async function forgotPassword(
@@ -256,7 +336,7 @@ export async function deleteJob(id: number): Promise<void> {
 }
 
 export async function checkJobUrl(
-  companyId: number,
+  companyId: number | null,
   url: string,
 ): Promise<{ exists: boolean }> {
   const response = await api.post<{ exists: boolean }>("/api/jobs/check-url", {
@@ -299,6 +379,14 @@ export async function failTask(
   data?: { notes?: string },
 ): Promise<Task> {
   const response = await api.post<Task>(`/api/tasks/${id}/fail`, data);
+  return response.data;
+}
+
+export async function addJobToTask(
+  taskId: number,
+  data: Record<string, unknown>,
+): Promise<Task> {
+  const response = await api.post<Task>(`/api/tasks/${taskId}/jobs`, data);
   return response.data;
 }
 
@@ -352,9 +440,58 @@ export async function deleteFilter(id: number): Promise<void> {
   await api.delete(`/api/filters/${id}`);
 }
 
+export async function getSectionOrder(): Promise<string[]> {
+  const response = await api.get<{ sections: string[] }>(
+    "/api/filters/section-order",
+  );
+  return response.data.sections;
+}
+
+export async function updateSectionOrder(sections: string[]): Promise<void> {
+  await api.put("/api/filters/section-order", { sections });
+}
+
 export async function getFilterPrompt(companyId: number | string): Promise<string> {
   const response = await api.get<{ prompt: string }>(
     `/api/filters/prompt/${companyId}`,
+  );
+  return response.data.prompt;
+}
+
+// ─── LinkedIn Searches API ──────────────────────────────────────────────────
+
+export async function getLinkedinSearches(): Promise<LinkedInSearch[]> {
+  const response = await api.get<LinkedInSearch[]>("/api/linkedin-searches");
+  return response.data;
+}
+
+export async function createLinkedinSearch(
+  data: Partial<LinkedInSearch>,
+): Promise<LinkedInSearch> {
+  const response = await api.post<LinkedInSearch>("/api/linkedin-searches", data);
+  return response.data;
+}
+
+export async function updateLinkedinSearch(
+  id: number,
+  data: Partial<LinkedInSearch>,
+): Promise<LinkedInSearch> {
+  const response = await api.patch<LinkedInSearch>(`/api/linkedin-searches/${id}`, data);
+  return response.data;
+}
+
+export async function deleteLinkedinSearch(id: number): Promise<void> {
+  await api.delete(`/api/linkedin-searches/${id}`);
+}
+
+export async function triggerLinkedinScan(id: number): Promise<Task> {
+  const response = await api.post<Task>(`/api/linkedin-searches/${id}/scan`);
+  return response.data;
+}
+
+export async function getLinkedinFilterPrompt(searchId: number | string): Promise<string> {
+  const response = await api.get<{ prompt: string }>(
+    `/api/filters/prompt/linkedin/${searchId}`,
   );
   return response.data.prompt;
 }

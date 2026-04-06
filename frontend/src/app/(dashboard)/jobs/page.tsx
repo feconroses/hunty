@@ -111,6 +111,9 @@ export default function JobsPage() {
   }, []);
 
   const isLoading = jobsLoading || stagesLoading;
+  const hasActiveFilters = Object.values(filters).some(
+    (v) => v !== undefined && v !== ""
+  );
   const isEmpty = !isLoading && jobs.length === 0 && stages.length > 0;
 
   return (
@@ -140,8 +143,12 @@ export default function JobsPage() {
       {isEmpty && (
         <EmptyState
           icon={Briefcase}
-          title="No jobs yet"
-          description="Jobs will appear here once they are discovered by scanning your tracked companies."
+          title={hasActiveFilters ? "No matching jobs" : "No jobs yet"}
+          description={
+            hasActiveFilters
+              ? "No jobs match the current filters. Try adjusting or clearing your filters."
+              : "Jobs will appear here once they are discovered by scanning your tracked companies."
+          }
         />
       )}
 
@@ -155,7 +162,7 @@ export default function JobsPage() {
       )}
 
       {/* Kanban board */}
-      {(isLoading || stages.length > 0) && (
+      {!isEmpty && (isLoading || stages.length > 0) && (
         <KanbanBoard
           jobs={enrichedJobs}
           stages={stages}

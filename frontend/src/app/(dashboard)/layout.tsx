@@ -22,7 +22,8 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!isInitializing && !isAuthenticated) {
-      router.replace("/login");
+      console.warn("[auth] Dashboard layout: not authenticated after init — redirecting to /login?expired");
+      router.replace("/login?expired");
     }
   }, [isInitializing, isAuthenticated, router]);
 

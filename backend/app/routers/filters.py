@@ -6,6 +6,8 @@ from app.models.user import User
 from app.schemas.filter_rule import (
     CreateFilterRequest,
     FilterRuleResponse,
+    SectionOrderRequest,
+    SectionOrderResponse,
     UpdateFilterRequest,
 )
 from app.services.filter_service import FilterService
@@ -32,6 +34,27 @@ async def create_filter(
     return await FilterService.create_filter(db, current_user.id, data)
 
 
+@router.get("/section-order", response_model=SectionOrderResponse)
+async def get_section_order(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get the user's filter section display order."""
+    sections = await FilterService.get_section_order(db, current_user.id)
+    return SectionOrderResponse(sections=sections)
+
+
+@router.put("/section-order", response_model=SectionOrderResponse)
+async def update_section_order(
+    data: SectionOrderRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update the user's filter section display order."""
+    sections = await FilterService.update_section_order(db, current_user.id, data.sections)
+    return SectionOrderResponse(sections=sections)
+
+
 @router.get("/prompt/{company_id}")
 async def generate_prompt(
     company_id: int,
@@ -40,6 +63,19 @@ async def generate_prompt(
 ):
     """Generate the Claude prompt for filtering jobs at a company."""
     prompt = await FilterService.generate_prompt(db, current_user.id, company_id)
+    return {"prompt": prompt}
+
+
+@router.get("/prompt/linkedin/{linkedin_search_id}")
+async def generate_linkedin_prompt(
+    linkedin_search_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Generate the Claude prompt for filtering jobs from a LinkedIn search."""
+    prompt = await FilterService.generate_linkedin_prompt(
+        db, current_user.id, linkedin_search_id
+    )
     return {"prompt": prompt}
 
 

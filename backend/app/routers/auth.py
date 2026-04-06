@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +14,8 @@ from app.schemas.auth import (
     ResetPasswordRequest,
 )
 from app.services.auth_service import AuthService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -82,17 +86,23 @@ async def refresh(
 ):
     """Refresh access token using the refresh_token cookie."""
     if refresh_token is None:
-        _clear_refresh_cookie(response)
+        logger.warning("[auth] Refresh called with NO cookie — returning 401")
+        # Don't clear the cookie here — if the cookie wasn't sent due to a
+        # transient issue (proxy timing, HMR, etc.), clearing it would make
+        # the problem permanent. The cookie may still be valid in the browser.
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No refresh token provided.",
         )
+    logger.info("[auth] Refresh called with cookie (len=%d)", len(refresh_token))
     try:
         result = await AuthService.refresh_token(db, refresh_token)
-    except HTTPException:
+    except HTTPException as exc:
+        logger.warning("[auth] Refresh token invalid: %s — clearing cookie", exc.detail)
         # Clear stale cookie so the browser doesn't keep sending it
         _clear_refresh_cookie(response)
         raise
+    logger.info("[auth] Refresh succeeded for user_id=%s", result.get("user", {}).get("id"))
     _set_refresh_cookie(response, result["refresh_token"])
     return AuthResponse(
         access_token=result["access_token"],

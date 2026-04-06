@@ -8,10 +8,25 @@ import {
   updateFilter as apiUpdateFilter,
   deleteFilter as apiDeleteFilter,
   getFilterPrompt as apiGetFilterPrompt,
+  getSectionOrder as apiGetSectionOrder,
+  updateSectionOrder as apiUpdateSectionOrder,
 } from "@/lib/api";
+
+export const DEFAULT_SECTION_ORDER = [
+  "title_include",
+  "title_exclude",
+  "description_include",
+  "location",
+  "seniority",
+  "work_type",
+  "min_salary",
+  "free_text",
+];
 
 export function useFilters() {
   const [filters, setFilters] = useState<FilterRule[]>([]);
+  const [sectionOrder, setSectionOrder] =
+    useState<string[]>(DEFAULT_SECTION_ORDER);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,8 +34,12 @@ export function useFilters() {
     try {
       setLoading(true);
       setError(null);
-      const data = await getFilters();
+      const [data, order] = await Promise.all([
+        getFilters(),
+        apiGetSectionOrder(),
+      ]);
       setFilters(data);
+      setSectionOrder(order);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to load filters";
@@ -33,27 +52,35 @@ export function useFilters() {
   const createFilter = useCallback(
     async (data: Partial<FilterRule>) => {
       const filter = await apiCreateFilter(data);
-      await fetchFilters();
+      setFilters((prev) => [...prev, filter]);
       return filter;
     },
-    [fetchFilters],
+    [],
   );
 
   const updateFilter = useCallback(
     async (id: number, data: Partial<FilterRule>) => {
       const filter = await apiUpdateFilter(id, data);
-      await fetchFilters();
+      setFilters((prev) => prev.map((f) => (f.id === id ? filter : f)));
       return filter;
     },
-    [fetchFilters],
+    [],
   );
 
   const deleteFilter = useCallback(
     async (id: number) => {
       await apiDeleteFilter(id);
-      await fetchFilters();
+      setFilters((prev) => prev.filter((f) => f.id !== id));
     },
-    [fetchFilters],
+    [],
+  );
+
+  const reorderSections = useCallback(
+    async (sections: string[]) => {
+      setSectionOrder(sections); // optimistic update
+      await apiUpdateSectionOrder(sections);
+    },
+    [],
   );
 
   const getPrompt = useCallback(async (companyId: number | string) => {
@@ -86,11 +113,13 @@ export function useFilters() {
     filters,
     loading,
     error,
+    sectionOrder,
     generalFilters,
     companyFilters,
     createFilter,
     updateFilter,
     deleteFilter,
+    reorderSections,
     getFilterPrompt: getPrompt,
     refetch: fetchFilters,
   };

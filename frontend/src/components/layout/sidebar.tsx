@@ -12,6 +12,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
@@ -27,6 +28,7 @@ import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
   { href: "/companies", label: "Target Companies", icon: Building2 },
+  { href: "/linkedin-searches", label: "LinkedIn Searches", icon: Search },
   { href: "/jobs", label: "Jobs", icon: Kanban },
   { href: "/tasks", label: "Tasks", icon: ListTodo },
   { href: "/filters", label: "Filters", icon: Filter },

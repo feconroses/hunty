@@ -19,7 +19,7 @@ export function useCompanies() {
     try {
       setLoading(true);
       setError(null);
-      const data = await getCompanies();
+      const data = await getCompanies({ source: "target" });
       setCompanies(data);
     } catch (err) {
       const message =

@@ -5,12 +5,13 @@ from pydantic import BaseModel
 
 
 class CheckJobUrlRequest(BaseModel):
-    company_id: int
+    company_id: int | None = None
     url: str
 
 
 class CreateJobRequest(BaseModel):
-    company_id: int
+    company_id: int | None = None
+    linkedin_search_id: int | None = None
     title: str
     url: str | None = None
     location: str | None = None
@@ -21,6 +22,7 @@ class CreateJobRequest(BaseModel):
     seniority_level: str | None = None
     department: str | None = None
     skills: list[str] = []
+    language_requirements: str | None = None
     description_summary: str | None = None
     full_description: str | None = None
     kanban_stage_id: int | None = None
@@ -38,6 +40,7 @@ class UpdateJobRequest(BaseModel):
     seniority_level: str | None = None
     department: str | None = None
     skills: list[str] | None = None
+    language_requirements: str | None = None
     description_summary: str | None = None
     full_description: str | None = None
     kanban_stage_id: int | None = None
@@ -58,7 +61,8 @@ class ReorderJobsRequest(BaseModel):
 class JobResponse(BaseModel):
     id: int
     user_id: int
-    company_id: int
+    company_id: int | None = None
+    linkedin_search_id: int | None = None
     title: str
     url: str | None = None
     location: str | None = None
@@ -69,6 +73,7 @@ class JobResponse(BaseModel):
     seniority_level: str | None = None
     department: str | None = None
     skills: list[Any] = []
+    language_requirements: str | None = None
     description_summary: str | None = None
     full_description: str | None = None
     notes: str | None = None

@@ -111,7 +111,7 @@ export function CompaniesTable({
         case "name":
           return multiplier * a.name.localeCompare(b.name);
         case "url":
-          return multiplier * a.url.localeCompare(b.url);
+          return multiplier * (a.url || "").localeCompare(b.url || "");
         case "careers_page_url":
           return (
             multiplier *
@@ -214,15 +214,19 @@ export function CompaniesTable({
                   {company.name}
                 </TableCell>
                 <TableCell>
-                  <a
-                    href={company.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-primary hover:underline"
-                  >
-                    {truncateUrl(company.url)}
-                    <ExternalLink className="size-3" />
-                  </a>
+                  {company.url ? (
+                    <a
+                      href={company.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
+                      {truncateUrl(company.url)}
+                      <ExternalLink className="size-3" />
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   {company.careers_page_url ? (
@@ -275,15 +279,19 @@ export function CompaniesTable({
                 <h3 className="font-semibold text-foreground">
                   {company.name}
                 </h3>
-                <a
-                  href={company.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-base text-primary hover:underline"
-                >
-                  {truncateUrl(company.url)}
-                  <ExternalLink className="size-3" />
-                </a>
+                {company.url ? (
+                  <a
+                    href={company.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-base text-primary hover:underline"
+                  >
+                    {truncateUrl(company.url)}
+                    <ExternalLink className="size-3" />
+                  </a>
+                ) : (
+                  <span className="text-muted-foreground text-base">—</span>
+                )}
               </div>
               <ActionsDropdown
                 company={company}
@@ -367,10 +375,10 @@ function ActionsDropdown({
         )}
         {company.careers_page_url && (
           <DropdownMenuItem
-            onClick={() => onCreateTask(company.id, "scan_jobs")}
+            onClick={() => onCreateTask(company.id, "scan_careers_page")}
           >
             <FileSearch className="size-4" />
-            Scan Jobs
+            Scan Careers Page
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />

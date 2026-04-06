@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import Column, DateTime, Integer, ForeignKey, String, func
 from sqlmodel import Field, SQLModel
 
-from app.models.enums import CompanyStatus
+from app.models.enums import CompanySource, CompanyStatus
 
 
 class Company(SQLModel, table=True):
@@ -13,8 +13,9 @@ class Company(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(sa_column=Column(Integer, ForeignKey("users.id"), nullable=False))
     name: str = Field(max_length=255)
-    url: str = Field(max_length=512)
+    url: Optional[str] = Field(default=None, max_length=512)
     careers_page_url: Optional[str] = Field(default=None, max_length=512)
+    source: CompanySource = Field(default=CompanySource.target)
     status: CompanyStatus = Field(default=CompanyStatus.pending)
     last_scanned_at: Optional[datetime] = Field(
         default=None,

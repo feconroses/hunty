@@ -29,6 +29,7 @@ class JobService:
         company_id: Optional[int] = None,
         work_type: Optional[str] = None,
         seniority_level: Optional[str] = None,
+        location: Optional[str] = None,
         search: Optional[str] = None,
         limit: int = 100,
         offset: int = 0,
@@ -56,6 +57,8 @@ class JobService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Invalid seniority_level: {seniority_level}",
                 )
+        if location is not None and location.strip():
+            query = query.where(Job.location.ilike(f"%{location.strip()}%"))
         if search is not None and search.strip():
             query = query.where(Job.title.ilike(f"%{search.strip()}%"))
 
@@ -83,17 +86,18 @@ class JobService:
         db: AsyncSession, user_id: int, data: CreateJobRequest
     ) -> Job:
         """Create a new job."""
-        # Verify company ownership
-        company_result = await db.execute(
-            select(Company).where(
-                Company.id == data.company_id, Company.user_id == user_id
+        # Verify company ownership if company_id provided
+        if data.company_id is not None:
+            company_result = await db.execute(
+                select(Company).where(
+                    Company.id == data.company_id, Company.user_id == user_id
+                )
             )
-        )
-        if company_result.scalar_one_or_none() is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Company not found.",
-            )
+            if company_result.scalar_one_or_none() is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Company not found.",
+                )
 
         job = Job(
             user_id=user_id,

@@ -12,7 +12,9 @@ from app.models.job import Job
 from app.models.kanban import KanbanStage
 from app.models.task import Task
 from app.models.filter_rule import FilterRule
+from app.models.linkedin_search import LinkedInSearch
 from app.models.activity_log import ActivityLog
+from app.models.filter_section_order import FilterSectionOrder
 
 __all__ = [
     "CompanyStatus",
@@ -28,5 +30,7 @@ __all__ = [
     "KanbanStage",
     "Task",
     "FilterRule",
+    "LinkedInSearch",
     "ActivityLog",
+    "FilterSectionOrder",
 ]

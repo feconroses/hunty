@@ -7,6 +7,7 @@ import {
   Columns3,
   Chrome,
   ArrowRight,
+  Search,
 } from "lucide-react";
 
 // ─── Feature Card ───────────────────────────────────────────────────────────
@@ -235,11 +236,16 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <FeatureCard
               icon={<Building2 className="size-5" />}
               title="Target Companies"
               description="Add your target companies and automatically discover their careers pages. Manage everything in a clean table view."
+            />
+            <FeatureCard
+              icon={<Search className="size-5" />}
+              title="LinkedIn Searches"
+              description="Define keyword searches and scan LinkedIn for matching job postings. Filter by location, experience, and more."
             />
             <FeatureCard
               icon={<Columns3 className="size-5" />}

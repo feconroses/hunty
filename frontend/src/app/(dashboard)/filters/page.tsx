@@ -63,8 +63,10 @@ export default function FiltersPage() {
     error,
     generalFilters,
     companyFilters,
+    sectionOrder,
     createFilter,
     deleteFilter,
+    reorderSections,
     getFilterPrompt,
   } = useFilters();
 
@@ -140,8 +142,10 @@ export default function FiltersPage() {
             <CardContent>
               <GeneralFilters
                 filters={generalFilters}
+                sectionOrder={sectionOrder}
                 onCreate={handleCreateFilter}
                 onDelete={handleDeleteFilter}
+                onReorderSections={reorderSections}
               />
             </CardContent>
           </Card>
@@ -158,6 +162,7 @@ export default function FiltersPage() {
               <CompanyFilters
                 filters={allCompanyFilters}
                 companies={companies}
+                sectionOrder={sectionOrder}
                 onCreate={handleCreateFilter}
                 onDelete={handleDeleteFilter}
               />

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, func
 
 from app.models.company import Company
-from app.models.enums import CompanyStatus, TaskQueue, TaskStatus, TaskType
+from app.models.enums import CompanySource, CompanyStatus, TaskQueue, TaskStatus, TaskType
 from app.models.filter_rule import FilterRule
 from app.models.job import Job
 from app.models.task import Task
@@ -21,13 +21,14 @@ class CompanyService:
 
     @staticmethod
     async def list_companies(
-        db: AsyncSession, user_id: int
+        db: AsyncSession, user_id: int, source: str | None = None
     ) -> list[dict]:
         """List all companies for a user, including pending task count."""
+        query = select(Company).where(Company.user_id == user_id)
+        if source is not None:
+            query = query.where(Company.source == CompanySource(source))
         result = await db.execute(
-            select(Company)
-            .where(Company.user_id == user_id)
-            .order_by(Company.created_at.desc())
+            query.order_by(Company.created_at.desc())
         )
         companies = result.scalars().all()
 
@@ -51,6 +52,7 @@ class CompanyService:
                 "name": company.name,
                 "url": company.url,
                 "careers_page_url": company.careers_page_url,
+                "source": company.source.value if isinstance(company.source, CompanySource) else company.source,
                 "status": company.status.value if isinstance(company.status, CompanyStatus) else company.status,
                 "last_scanned_at": company.last_scanned_at,
                 "jobs_found_count": company.jobs_found_count,

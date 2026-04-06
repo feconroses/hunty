@@ -3,7 +3,12 @@
 import { useState, useCallback, useMemo } from "react";
 import { Plus, Trash2, Building2, ChevronDown, ChevronRight } from "lucide-react";
 import type { FilterRule, FilterRuleType, Company } from "@/types";
-import { SENIORITY_LEVELS, WORK_TYPES } from "@/lib/constants";
+import {
+  IC_SENIORITY_LEVELS,
+  MANAGEMENT_SENIORITY_LEVELS,
+  SENIORITY_LABELS,
+  WORK_TYPES,
+} from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,14 +38,6 @@ function decodeValue(encoded: string): { category: string; val: string } {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const SENIORITY_LABELS: Record<string, string> = {
-  junior: "Junior",
-  mid: "Mid",
-  senior: "Senior",
-  lead: "Lead",
-  executive: "Executive",
-};
-
 const WORK_TYPE_LABELS: Record<string, string> = {
   remote: "Remote",
   hybrid: "Hybrid",
@@ -52,6 +49,7 @@ const WORK_TYPE_LABELS: Record<string, string> = {
 interface CompanyFiltersProps {
   filters: FilterRule[];
   companies: Company[];
+  sectionOrder: string[];
   onCreate: (data: Partial<FilterRule>) => Promise<FilterRule>;
   onDelete: (id: number) => Promise<void>;
 }
@@ -62,6 +60,7 @@ interface CompanyFilterGroupProps {
   companyId: number;
   companyName: string;
   rules: FilterRule[];
+  sectionOrder: string[];
   onCreate: (data: Partial<FilterRule>) => Promise<FilterRule>;
   onDelete: (id: number) => Promise<void>;
   onDeleteAll: () => Promise<void>;
@@ -71,6 +70,7 @@ function CompanyFilterGroup({
   companyId,
   companyName,
   rules,
+  sectionOrder,
   onCreate,
   onDelete,
   onDeleteAll,
@@ -81,7 +81,8 @@ function CompanyFilterGroup({
     const map: Record<string, { rule: FilterRule; val: string }[]> = {};
     for (const f of rules) {
       const { category, val } = decodeValue(f.value);
-      const key = `${category}_${f.rule_type}`;
+      const logicGroup = f.logic_group || "all";
+      const key = `${category}_${f.rule_type}_${logicGroup}`;
       if (!map[key]) map[key] = [];
       map[key].push({ rule: f, val });
     }
@@ -89,15 +90,15 @@ function CompanyFilterGroup({
   }, [rules]);
 
   const getKeywords = useCallback(
-    (category: string, ruleType: FilterRuleType): string[] => {
-      return (byCategory[`${category}_${ruleType}`] || []).map((e) => e.val);
+    (category: string, ruleType: FilterRuleType, logicGroup: string = "all"): string[] => {
+      return (byCategory[`${category}_${ruleType}_${logicGroup}`] || []).map((e) => e.val);
     },
     [byCategory],
   );
 
   const getRules = useCallback(
-    (category: string, ruleType: FilterRuleType) => {
-      return byCategory[`${category}_${ruleType}`] || [];
+    (category: string, ruleType: FilterRuleType, logicGroup: string = "all") => {
+      return byCategory[`${category}_${ruleType}_${logicGroup}`] || [];
     },
     [byCategory],
   );
@@ -106,9 +107,10 @@ function CompanyFilterGroup({
     async (
       category: string,
       ruleType: FilterRuleType,
+      logicGroup: string,
       newValues: string[],
     ) => {
-      const existing = getRules(category, ruleType);
+      const existing = getRules(category, ruleType, logicGroup);
       const existingVals = existing.map((e) => e.val);
 
       const added = newValues.filter((v) => !existingVals.includes(v));
@@ -119,6 +121,7 @@ function CompanyFilterGroup({
           company_id: companyId,
           rule_type: ruleType,
           value: encodeValue(category, val),
+          logic_group: logicGroup,
         });
       }
 
@@ -190,6 +193,222 @@ function CompanyFilterGroup({
     [companyId, currentFreeText, onCreate, onDelete],
   );
 
+  function renderSection(key: string) {
+    switch (key) {
+      case "title_include":
+        return (
+          <div className="space-y-3">
+            <Label className="text-base">Title Keywords (Include)</Label>
+            <div className="space-y-3 pl-3 border-l-2 border-border">
+              <div>
+                <KeywordInput
+                  label="Must match ALL"
+                  value={getKeywords("title", "include", "all")}
+                  onChange={(vals) => handleKeywordsChange("title", "include", "all", vals)}
+                  placeholder="e.g. Engineer, Python"
+                />
+              </div>
+              <div>
+                <KeywordInput
+                  label="Must match at least ONE"
+                  value={getKeywords("title", "include", "any")}
+                  onChange={(vals) => handleKeywordsChange("title", "include", "any", vals)}
+                  placeholder="e.g. Frontend, Backend, Fullstack"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case "title_exclude":
+        return (
+          <div className="space-y-3">
+            <Label className="text-base">Title Keywords (Exclude)</Label>
+            <div className="space-y-3 pl-3 border-l-2 border-border">
+              <div>
+                <KeywordInput
+                  label="Exclude if ALL appear"
+                  value={getKeywords("title", "exclude", "all")}
+                  onChange={(vals) => handleKeywordsChange("title", "exclude", "all", vals)}
+                  placeholder="e.g. Intern, Junior"
+                />
+              </div>
+              <div>
+                <KeywordInput
+                  label="Exclude if ANY appears"
+                  value={getKeywords("title", "exclude", "any")}
+                  onChange={(vals) => handleKeywordsChange("title", "exclude", "any", vals)}
+                  placeholder="e.g. Manager, Director, VP"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case "description_include":
+        return (
+          <div className="space-y-3">
+            <Label className="text-base">Description Keywords</Label>
+            <div className="space-y-3 pl-3 border-l-2 border-border">
+              <div>
+                <KeywordInput
+                  label="Must mention ALL"
+                  value={getKeywords("description", "include", "all")}
+                  onChange={(vals) => handleKeywordsChange("description", "include", "all", vals)}
+                  placeholder="e.g. machine learning, Python"
+                />
+              </div>
+              <div>
+                <KeywordInput
+                  label="Must mention at least ONE"
+                  value={getKeywords("description", "include", "any")}
+                  onChange={(vals) => handleKeywordsChange("description", "include", "any", vals)}
+                  placeholder="e.g. Robotics, Computer Vision, NLP"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case "location":
+        return (
+          <KeywordInput
+            label="Locations"
+            value={getKeywords("location", "include")}
+            onChange={(vals) => handleKeywordsChange("location", "include", "all", vals)}
+            placeholder="e.g. San Francisco, Remote"
+          />
+        );
+
+      case "seniority":
+        return (
+          <div className="space-y-3">
+            <Label>Seniority Levels</Label>
+            <div className="space-y-3 pl-3 border-l-2 border-border">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">IC</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  {IC_SENIORITY_LEVELS.map((level) => {
+                    const isChecked = getKeywords("seniority", "include").includes(level);
+                    return (
+                      <label
+                        key={level}
+                        className="flex items-center gap-2 text-base cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) =>
+                            handleCheckboxChange("seniority", level, checked === true)
+                          }
+                        />
+                        {SENIORITY_LABELS[level]}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">Management</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  {MANAGEMENT_SENIORITY_LEVELS.map((level) => {
+                    const isChecked = getKeywords("seniority", "include").includes(level);
+                    return (
+                      <label
+                        key={level}
+                        className="flex items-center gap-2 text-base cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) =>
+                            handleCheckboxChange("seniority", level, checked === true)
+                          }
+                        />
+                        {SENIORITY_LABELS[level]}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "work_type":
+        return (
+          <div className="space-y-2">
+            <Label>Work Type</Label>
+            <div className="flex flex-wrap gap-4">
+              {WORK_TYPES.map((wt) => {
+                const isChecked = getKeywords("work_type", "include").includes(wt);
+                return (
+                  <label
+                    key={wt}
+                    className="flex items-center gap-2 text-base cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={isChecked}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange("work_type", wt, checked === true)
+                      }
+                    />
+                    {WORK_TYPE_LABELS[wt]}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        );
+
+      case "min_salary":
+        return (
+          <div className="space-y-1.5">
+            <Label>Minimum Salary</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={0}
+                step={1000}
+                placeholder="e.g. 80000"
+                defaultValue={currentSalary?.val ?? ""}
+                className="w-48"
+                onBlur={(e) => handleSalaryChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSalaryChange(e.currentTarget.value);
+                  }
+                }}
+              />
+              {currentSalary && (
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => onDelete(currentSalary.rule.id)}
+                >
+                  <Trash2 className="size-3.5 text-muted-foreground" />
+                </Button>
+              )}
+            </div>
+          </div>
+        );
+
+      case "free_text":
+        return (
+          <div className="space-y-1.5">
+            <Label>Free-text Criteria</Label>
+            <Textarea
+              placeholder="Additional criteria specific to this company..."
+              defaultValue={currentFreeText?.val ?? ""}
+              rows={3}
+              onBlur={(e) => handleFreeTextSave(e.target.value)}
+            />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  }
+
   return (
     <div className="rounded-lg border border-border">
       <div className="flex items-center justify-between px-4 py-3">
@@ -221,158 +440,12 @@ function CompanyFilterGroup({
 
       {expanded && (
         <div className="border-t border-border px-4 py-4 space-y-5">
-          {/* Title Keywords (Include) */}
-          <KeywordInput
-            label="Title Keywords (Include)"
-            value={getKeywords("title", "include")}
-            onChange={(vals) => handleKeywordsChange("title", "include", vals)}
-            placeholder="e.g. Engineer, Developer"
-          />
-
-          <Separator />
-
-          {/* Title Keywords (Exclude) */}
-          <KeywordInput
-            label="Title Keywords (Exclude)"
-            value={getKeywords("title", "exclude")}
-            onChange={(vals) => handleKeywordsChange("title", "exclude", vals)}
-            placeholder="e.g. Intern, Manager"
-          />
-
-          <Separator />
-
-          {/* Description Keywords */}
-          <KeywordInput
-            label="Description Keywords"
-            value={getKeywords("description", "include")}
-            onChange={(vals) =>
-              handleKeywordsChange("description", "include", vals)
-            }
-            placeholder="e.g. React, Python"
-          />
-
-          <Separator />
-
-          {/* Locations */}
-          <KeywordInput
-            label="Locations"
-            value={getKeywords("location", "include")}
-            onChange={(vals) =>
-              handleKeywordsChange("location", "include", vals)
-            }
-            placeholder="e.g. San Francisco, Remote"
-          />
-
-          <Separator />
-
-          {/* Seniority Levels */}
-          <div className="space-y-2">
-            <Label>Seniority Levels</Label>
-            <div className="flex flex-wrap gap-4">
-              {SENIORITY_LEVELS.map((level) => {
-                const isChecked = getKeywords(
-                  "seniority",
-                  "include",
-                ).includes(level);
-                return (
-                  <label
-                    key={level}
-                    className="flex items-center gap-2 text-base cursor-pointer"
-                  >
-                    <Checkbox
-                      checked={isChecked}
-                      onCheckedChange={(checked) =>
-                        handleCheckboxChange(
-                          "seniority",
-                          level,
-                          checked === true,
-                        )
-                      }
-                    />
-                    {SENIORITY_LABELS[level]}
-                  </label>
-                );
-              })}
+          {sectionOrder.map((key, index) => (
+            <div key={key}>
+              {index > 0 && <Separator className="mb-5" />}
+              {renderSection(key)}
             </div>
-          </div>
-
-          <Separator />
-
-          {/* Work Type */}
-          <div className="space-y-2">
-            <Label>Work Type</Label>
-            <div className="flex flex-wrap gap-4">
-              {WORK_TYPES.map((wt) => {
-                const isChecked = getKeywords(
-                  "work_type",
-                  "include",
-                ).includes(wt);
-                return (
-                  <label
-                    key={wt}
-                    className="flex items-center gap-2 text-base cursor-pointer"
-                  >
-                    <Checkbox
-                      checked={isChecked}
-                      onCheckedChange={(checked) =>
-                        handleCheckboxChange(
-                          "work_type",
-                          wt,
-                          checked === true,
-                        )
-                      }
-                    />
-                    {WORK_TYPE_LABELS[wt]}
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Minimum Salary */}
-          <div className="space-y-1.5">
-            <Label>Minimum Salary</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min={0}
-                step={1000}
-                placeholder="e.g. 80000"
-                defaultValue={currentSalary?.val ?? ""}
-                className="w-48"
-                onBlur={(e) => handleSalaryChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSalaryChange(e.currentTarget.value);
-                  }
-                }}
-              />
-              {currentSalary && (
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => onDelete(currentSalary.rule.id)}
-                >
-                  <Trash2 className="size-3.5 text-muted-foreground" />
-                </Button>
-              )}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Free-text Criteria */}
-          <div className="space-y-1.5">
-            <Label>Free-text Criteria</Label>
-            <Textarea
-              placeholder="Additional criteria specific to this company..."
-              defaultValue={currentFreeText?.val ?? ""}
-              rows={3}
-              onBlur={(e) => handleFreeTextSave(e.target.value)}
-            />
-          </div>
+          ))}
         </div>
       )}
     </div>
@@ -384,6 +457,7 @@ function CompanyFilterGroup({
 export function CompanyFilters({
   filters,
   companies,
+  sectionOrder,
   onCreate,
   onDelete,
 }: CompanyFiltersProps) {
@@ -492,6 +566,7 @@ export function CompanyFilters({
             companyId={Number(companyId)}
             companyName={getCompanyName(companyId)}
             rules={grouped[companyId]}
+            sectionOrder={sectionOrder}
             onCreate={onCreate}
             onDelete={onDelete}
             onDeleteAll={() => handleDeleteAll(companyId)}

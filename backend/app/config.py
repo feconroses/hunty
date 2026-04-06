@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://hunty:hunty@localhost:5432/hunty"
     DATABASE_URL_SYNC: str = "postgresql+psycopg://hunty:hunty@localhost:5432/hunty"
     JWT_SECRET_KEY: str = "change-me-in-production"
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 720
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 30
     JWT_ALGORITHM: str = "HS256"
     RESEND_API_KEY: str = ""

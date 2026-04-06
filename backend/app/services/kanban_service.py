@@ -18,6 +18,7 @@ DEFAULT_STAGES = [
     {"name": "Offer", "color": "#1db954", "order": 4},
     {"name": "Rejected", "color": "#ef4444", "order": 5},
     {"name": "Not Interested", "color": "#6b7280", "order": 6},
+    {"name": "Unavailable", "color": "#9ca3af", "order": 7},
 ]
 
 
