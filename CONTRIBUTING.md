@@ -120,4 +120,4 @@ Be kind. We follow the spirit of the [Contributor Covenant](https://www.contribu
 
 Thanks again. I'll do my best to review PRs within a few days.
 
-— Federico
+— Feco

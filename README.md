@@ -55,7 +55,7 @@ So I built Hunty. You define your filters once, let Claude do the combing, and t
 
 It's early. It works for the people I built it for. I'd love to make it work for you too — say hi in [Discussions](https://github.com/feconroses/hunty/discussions).
 
-— Federico
+— Feco
 
 ## How it works
 
@@ -163,4 +163,4 @@ Hunty is the front-end and the glue. The hard parts are owed to:
 
 ---
 
-<sub>Built by [Federico Pascual](https://github.com/feconroses). Questions, ideas, or just saying hi → [Discussions](https://github.com/feconroses/hunty/discussions).</sub>
+<sub>Built by [Feco](https://github.com/feconroses). Questions, ideas, or just saying hi → [Discussions](https://github.com/feconroses/hunty/discussions).</sub>
