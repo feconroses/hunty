@@ -35,10 +35,6 @@ node_modules/
 # .next
 .next/
 
-# package-lock.json
-package-lock.json
-yarn.lock
-
 # environemnt variables
 .env
 .env.local
