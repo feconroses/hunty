@@ -10,11 +10,13 @@
 [![Last commit](https://img.shields.io/github/last-commit/feconroses/hunty)](https://github.com/feconroses/hunty/commits/main)
 [![Discussions](https://img.shields.io/github/discussions/feconroses/hunty)](https://github.com/feconroses/hunty/discussions)
 
+*A demo GIF is [coming soon](https://github.com/feconroses/hunty/issues/2) — for now, see the [Quick start](#quick-start) to try Hunty yourself.*
+
 <!--
-DEMO GIF PLACEHOLDER:
+TODO: replace the line above with the demo GIF. Tracking issue: https://github.com/feconroses/hunty/issues/2
 - Record a 600-800px wide, 8-20s clip showing Claude scanning a LinkedIn search and adding jobs to the kanban.
 - Tools: Kap (free), ScreenStudio, CleanShot X. Aim for <5MB.
-- To host: drag-drop the file into a draft GitHub issue, copy the resulting `https://user-images.githubusercontent.com/...` URL, then replace this comment with: ![Hunty demo](URL)
+- To host: drag-drop the file into a draft GitHub issue, copy the resulting `https://user-images.githubusercontent.com/...` URL, then replace this section with: ![Hunty demo](URL)
 -->
 
 </div>
