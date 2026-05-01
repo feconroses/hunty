@@ -19,7 +19,7 @@ DEMO GIF PLACEHOLDER:
 
 </div>
 
-Hunty is a self-hosted job search and application tracking tool. You tell it which companies you'd want to work at and the filters that matter to you (skills, seniority, work type, salary). Claude — running in your browser via the [Claude in Chrome](https://www.anthropic.com/claude/chrome) extension — does the rest: visits careers pages, paginates through LinkedIn searches, evaluates each posting against your filters, deduplicates, and drops the matches into a kanban board you can move through your application pipeline.
+Hunty is a self-hosted job search and application tracking tool. You tell it which companies you'd want to work at and the filters that matter to you (skills, seniority, work type, salary). Claude — running in your browser via the [Claude in Chrome](https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn) extension — does the rest: visits careers pages, paginates through LinkedIn searches, evaluates each posting against your filters, deduplicates, and drops the matches into a kanban board you can move through your application pipeline.
 
 - **Self-hosted.** Your filters, jobs, and application history never leave your machine.
 - **No API keys.** Hunty has no internal LLM. AI work is delegated to Claude in your own browser.
@@ -41,7 +41,7 @@ docker-compose up
 
 Open http://localhost:3000 — that's it. Docker brings up Postgres, runs migrations, and starts the backend (FastAPI on `:8000`) and frontend (Next.js on `:3000`) with hot reload.
 
-Sign up, add a target company or LinkedIn search, define your filters, then head to `/tasks` in Chrome with the [Claude in Chrome](https://www.anthropic.com/claude/chrome) extension installed — copy the prompt and hand it to Claude.
+Sign up, add a target company or LinkedIn search, define your filters, then head to `/tasks` in Chrome with the [Claude in Chrome](https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn) extension installed — copy the prompt and hand it to Claude.
 
 For manual setup or contributing changes, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
@@ -152,7 +152,7 @@ See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for dev setup, project layout, and 
 
 Hunty is the front-end and the glue. The hard parts are owed to:
 
-- **[Claude in Chrome](https://www.anthropic.com/claude/chrome)** — the browser-automation Claude that does the real work
+- **[Claude in Chrome](https://chromewebstore.google.com/detail/claude/fcoeoabgfenejglbffodgkkbkcdhcgfn)** — the browser-automation Claude that does the real work
 - **[Next.js](https://nextjs.org/)** and **[FastAPI](https://fastapi.tiangolo.com/)** — the frameworks
 - **[shadcn/ui](https://ui.shadcn.com/)** — the component primitives
 - **[SQLModel](https://sqlmodel.tiangolo.com/)**, **[Alembic](https://alembic.sqlalchemy.org/)**, **[PostgreSQL](https://www.postgresql.org/)** — the data stack
